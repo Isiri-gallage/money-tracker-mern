@@ -27,16 +27,8 @@ import {
 } from "../api/transactions";
 import { getBudgets, upsertBudget, deleteBudget, type Budget } from "../api/budgets";
 import RecurringPanel from "../components/RecurringPanel";
+import SpendingCharts from "../components/SpendingCharts";
 
-const CATEGORY_PALETTE = [
-  "#6366f1",
-  "#059669",
-  "#dc2626",
-  "#d97706",
-  "#0891b2",
-  "#7c3aed",
-  "#db2777",
-];
 
 const ACCOUNT_ICONS: Record<AccountType, typeof Wallet> = {
   cash: Wallet,
@@ -113,19 +105,7 @@ const [budgetLimit, setBudgetLimit] = useState("");
     return map;
   }, [accounts]);
 
-  const categoryBreakdown = useMemo(() => {
-    if (!summary) return [];
-    const entries = Object.entries(summary.byCategory);
-    const max = Math.max(1, ...entries.map(([, total]) => total));
-    return entries
-      .map(([name, total], i) => ({
-        name,
-        total,
-        pct: (total / max) * 100,
-        color: CATEGORY_PALETTE[i % CATEGORY_PALETTE.length],
-      }))
-      .sort((a, b) => b.total - a.total);
-  }, [summary]);
+
 
   async function handleAddAccount(e: FormEvent) {
     e.preventDefault();
@@ -492,6 +472,11 @@ async function handleDeleteBudget(budget: Budget) {
                 currency={currency}
                 onChanged={loadAll}
               />
+                            <SpendingCharts
+                transactions={transactions}
+                categories={categories}
+                currency={currency}
+              />
             </div>
 
             <div className="space-y-6">
@@ -651,27 +636,6 @@ async function handleDeleteBudget(budget: Budget) {
                 )}
               </section>
 
-              {categoryBreakdown.length > 0 && (
-                <section className="rounded-2xl border border-slate-200 bg-white p-6">
-                  <h2 className="text-sm font-semibold text-slate-900">By category</h2>
-                  <ul className="mt-4 space-y-3">
-                    {categoryBreakdown.map((c) => (
-                      <li key={c.name}>
-                        <div className="mb-1 flex items-center justify-between text-xs">
-                          <span className="font-medium text-slate-600">{c.name}</span>
-                          <span className="tabular-nums text-slate-400">{formatCurrency(c.total, currency)}</span>
-                        </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                          <div
-                            className="h-full rounded-full"
-                            style={{ width: `${c.pct}%`, backgroundColor: c.color }}
-                          />
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
 
               <section className="rounded-2xl border border-slate-200 bg-white p-6">
                 <h2 className="text-sm font-semibold text-slate-900">Categories</h2>
