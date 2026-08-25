@@ -90,8 +90,8 @@ describe("runDueRecurringTransactions", () => {
     expect(created).toBe(1);
 
     const txs = await request(app).get("/api/transactions").set("Authorization", `Bearer ${token}`);
-    expect(txs.body).toHaveLength(1);
-    expect(txs.body[0].description).toBe("Gym");
+    expect(txs.body.items).toHaveLength(1);
+    expect(txs.body.items[0].description).toBe("Gym");
   });
 
   it("does not generate anything before the due date", async () => {
@@ -129,7 +129,7 @@ describe("runDueRecurringTransactions", () => {
     expect(created).toBe(4);
 
     const txs = await request(app).get("/api/transactions").set("Authorization", `Bearer ${token}`);
-    expect(txs.body).toHaveLength(4);
+    expect(txs.body.items).toHaveLength(4);
   });
 
   it("skips inactive recurring transactions", async () => {

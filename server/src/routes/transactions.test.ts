@@ -94,8 +94,182 @@ describe("GET /api/transactions", () => {
     const res = await request(app).get("/api/transactions").set("Authorization", `Bearer ${tokenA}`);
 
     expect(res.status).toBe(200);
-    expect(res.body).toHaveLength(1);
-    expect(res.body[0].amount).toBe(10);
+    expect(res.body.items).toHaveLength(1);
+    expect(res.body.items[0].amount).toBe(10);
+    expect(res.body.total).toBe(1);
+  });
+});
+
+describe("GET /api/transactions — pagination", () => {
+  async function seed(count: number) {
+    const session = await registerAndGetSession("page@example.com");
+    for (let i = 0; i < count; i++) {
+      await request(app)
+        .post("/api/transactions")
+        .set("Authorization", `Bearer ${session.token}`)
+        .send({
+          amount: i + 1,
+          type: "expense",
+          description: `tx-${i}`,
+          accountId: session.accountId,
+          date: new Date(Date.UTC(2026, 0, i + 1)).toISOString(),
+        });
+    }
+    return session;
+  }
+
+  it("defaults to 20 items per page", async () => {
+    const { token } = await seed(25);
+    const res = await request(app).get("/api/transactions").set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(20);
+    expect(res.body.total).toBe(25);
+    expect(res.body.page).toBe(1);
+    expect(res.body.totalPages).toBe(2);
+  });
+
+  it("returns the remainder on the last page", async () => {
+    const { token } = await seed(25);
+    const res = await request(app).get("/api/transactions?page=2").set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(5);
+    expect(res.body.page).toBe(2);
+  });
+
+  it("honours an explicit limit", async () => {
+    const { token } = await seed(25);
+    const res = await request(app).get("/api/transactions?limit=5").set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(5);
+    expect(res.body.totalPages).toBe(5);
+  });
+
+  it("caps the limit at 100", async () => {
+    const { token } = await seed(3);
+    const res = await request(app).get("/api/transactions?limit=5000").set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.limit).toBe(100);
+  });
+
+  it("falls back to defaults for junk pagination values", async () => {
+    const { token } = await seed(3);
+    const res = await request(app)
+      .get("/api/transactions?page=abc&limit=-4")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.page).toBe(1);
+    expect(res.body.limit).toBe(20);
+  });
+
+  it("sorts newest first", async () => {
+    const { token } = await seed(3);
+    const res = await request(app).get("/api/transactions").set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items[0].description).toBe("tx-2");
+  });
+});
+
+describe("GET /api/transactions — filtering", () => {
+  async function seedMixed() {
+    const session = await registerAndGetSession("filter@example.com");
+    const { token, accountId } = session;
+
+    const category = await request(app)
+      .post("/api/categories")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ name: "Groceries", type: "expense" });
+
+    const second = await request(app)
+      .post("/api/accounts")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ name: "Bank", type: "bank" });
+
+    await request(app)
+      .post("/api/transactions")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        amount: 100,
+        type: "expense",
+        description: "Weekly groceries",
+        accountId,
+        categoryId: category.body._id,
+        date: "2026-01-15T00:00:00.000Z",
+      });
+
+    await request(app)
+      .post("/api/transactions")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        amount: 2000,
+        type: "income",
+        description: "Salary",
+        accountId: second.body._id,
+        date: "2026-02-01T00:00:00.000Z",
+      });
+
+    return { token, accountId, categoryId: category.body._id, bankId: second.body._id };
+  }
+
+  it("filters by type", async () => {
+    const { token } = await seedMixed();
+    const res = await request(app).get("/api/transactions?type=income").set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(1);
+    expect(res.body.items[0].description).toBe("Salary");
+  });
+
+  it("filters by category", async () => {
+    const { token, categoryId } = await seedMixed();
+    const res = await request(app)
+      .get(`/api/transactions?categoryId=${categoryId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(1);
+    expect(res.body.items[0].description).toBe("Weekly groceries");
+  });
+
+  it("filters by account", async () => {
+    const { token, bankId } = await seedMixed();
+    const res = await request(app)
+      .get(`/api/transactions?accountId=${bankId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(1);
+    expect(res.body.items[0].description).toBe("Salary");
+  });
+
+  it("filters by date range", async () => {
+    const { token } = await seedMixed();
+    const res = await request(app)
+      .get("/api/transactions?from=2026-01-01&to=2026-01-31")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(1);
+    expect(res.body.items[0].description).toBe("Weekly groceries");
+  });
+
+  it("searches the description case-insensitively", async () => {
+    const { token } = await seedMixed();
+    const res = await request(app).get("/api/transactions?q=SALARY").set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(1);
+    expect(res.body.items[0].description).toBe("Salary");
+  });
+
+  it("treats regex characters in search as literal text", async () => {
+    const { token } = await seedMixed();
+    const res = await request(app).get("/api/transactions?q=.*").set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(0);
+  });
+
+  it("combines filters", async () => {
+    const { token, categoryId } = await seedMixed();
+    const res = await request(app)
+      .get(`/api/transactions?type=expense&categoryId=${categoryId}&q=weekly`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.body.items).toHaveLength(1);
   });
 });
 

@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -14,61 +13,26 @@ import {
 } from "recharts";
 import { ChartPie } from "lucide-react";
 import { formatCurrency } from "../lib/format";
-import type { CurrencyCode } from "../lib/currencies";
-import type { Category } from "../api/categories";
-import type { Transaction } from "../api/transactions";
 import { categoryColor } from "../lib/categoryVisuals";
-
+import type { CurrencyCode } from "../lib/currencies";
+import type { CategorySlice, MonthlyPoint } from "../api/stats";
 
 interface Props {
-  transactions: Transaction[];
-  categories: Category[];
+  byCategory: CategorySlice[];
+  monthly: MonthlyPoint[];
   currency: CurrencyCode;
 }
 
-export default function SpendingCharts({ transactions, categories, currency }: Props) {
-  const thisMonth = new Date().toISOString().slice(0, 7);
+function monthLabel(month: string): string {
+  return new Date(`${month}-01T00:00:00Z`).toLocaleDateString("en-US", {
+    month: "short",
+    timeZone: "UTC",
+  });
+}
 
-  const categoryNames = useMemo(() => {
-    const map = new Map<string, string>();
-    categories.forEach((c) => map.set(c._id, c.name));
-    return map;
-  }, [categories]);
-
-  const byCategory = useMemo(() => {
-    const totals = new Map<string, number>();
-    for (const t of transactions) {
-      if (t.type !== "expense") continue;
-      if (t.date.slice(0, 7) !== thisMonth) continue;
-      const name = (t.category && categoryNames.get(t.category)) || "Uncategorized";
-      totals.set(name, (totals.get(name) ?? 0) + t.amount);
-    }
-    return Array.from(totals, ([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-  }, [transactions, categoryNames, thisMonth]);
-
-  const monthTotal = byCategory.reduce((sum, d) => sum + d.value, 0);
-
-  const monthly = useMemo(() => {
-    const now = new Date();
-    const months: string[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
-      months.push(d.toISOString().slice(0, 7));
-    }
-
-    const rows = new Map(months.map((m) => [m, { month: m, income: 0, expense: 0 }]));
-    for (const t of transactions) {
-      const row = rows.get(t.date.slice(0, 7));
-      if (!row) continue;
-      if (t.type === "income") row.income += t.amount;
-      else row.expense += t.amount;
-    }
-
-    return months.map((m) => ({
-      ...rows.get(m)!,
-      label: new Date(`${m}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }),
-    }));
-  }, [transactions]);
+export default function SpendingCharts({ byCategory, monthly, currency }: Props) {
+  const monthTotal = byCategory.reduce((sum, d) => sum + d.total, 0);
+  const trend = monthly.map((m) => ({ ...m, label: monthLabel(m.month) }));
 
   return (
     <section className="rounded-2xl border border-line bg-card p-6">
@@ -90,7 +54,7 @@ export default function SpendingCharts({ transactions, categories, currency }: P
                   <PieChart>
                     <Pie
                       data={byCategory}
-                      dataKey="value"
+                      dataKey="total"
                       nameKey="name"
                       innerRadius={58}
                       outerRadius={84}
@@ -125,7 +89,7 @@ export default function SpendingCharts({ transactions, categories, currency }: P
                       {d.name}
                     </span>
                     <span className="tabular-nums text-ink-faint">
-                      {formatCurrency(d.value, currency)} · {Math.round((d.value / monthTotal) * 100)}%
+                      {formatCurrency(d.total, currency)} · {Math.round((d.total / monthTotal) * 100)}%
                     </span>
                   </li>
                 ))}
@@ -138,14 +102,14 @@ export default function SpendingCharts({ transactions, categories, currency }: P
           <p className="text-xs font-medium text-ink-dim">Income vs expense · last 6 months</p>
           <div className="mt-2 h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthly} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+              <BarChart data={trend} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#232c40" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#5b6885" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#5b6885" }} axisLine={false} tickLine={false} width={56} />
                 <Tooltip formatter={(value) => formatCurrency(Number(value), currency)} cursor={{ fill: "#1c2436" }} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="income" name="Income" fill="#059669" radius={[3, 3, 0, 0]} />
-                <Bar dataKey="expense" name="Expense" fill="#e11d48" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="income" name="Income" fill="#34d399" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="expense" name="Expense" fill="#fb7185" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

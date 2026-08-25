@@ -1,9 +1,15 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { useAuth } from "./context/useAuth";
+import AppLayout from "./components/AppLayout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import Overview from "./pages/Overview";
+import TransactionsPage from "./pages/TransactionsPage";
+import BudgetsPage from "./pages/BudgetsPage";
+import AccountsPage from "./pages/AccountsPage";
+import RecurringPage from "./pages/RecurringPage";
+import SettingsPage from "./pages/SettingsPage";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -15,14 +21,23 @@ function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
       <Route
-        path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <AppLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="/" element={<Overview />} />
+        <Route path="/transactions" element={<TransactionsPage />} />
+        <Route path="/budgets" element={<BudgetsPage />} />
+        <Route path="/accounts" element={<AccountsPage />} />
+        <Route path="/recurring" element={<RecurringPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
