@@ -26,6 +26,7 @@ import {
   type Summary,
 } from "../api/transactions";
 import { getBudgets, upsertBudget, deleteBudget, type Budget } from "../api/budgets";
+import RecurringPanel from "../components/RecurringPanel";
 
 const CATEGORY_PALETTE = [
   "#6366f1",
@@ -485,6 +486,12 @@ async function handleDeleteBudget(budget: Budget) {
                   </div>
                 )}
               </section>
+                            <RecurringPanel
+                accounts={accounts}
+                categories={categories}
+                currency={currency}
+                onChanged={loadAll}
+              />
             </div>
 
             <div className="space-y-6">
