@@ -1,1 +1,54 @@
 @import "tailwindcss";
+
+@theme {
+  --color-canvas: #0b0f19;
+  --color-card: #141b2b;
+  --color-card-hi: #1c2436;
+  --color-line: #232c40;
+
+  --color-ink: #e8ecf5;
+  --color-ink-dim: #93a0bd;
+  --color-ink-faint: #5b6885;
+
+  --color-brand: #8b5cf6;
+  --color-brand-soft: #a78bfa;
+  --color-pos: #34d399;
+  --color-neg: #fb7185;
+  --color-warn: #fbbf24;
+  --color-info: #22d3ee;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-brand) 40%, transparent);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-canvas);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+    border-radius: 9999px;
+    border: 2px solid var(--color-canvas);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ink-faint);
+  }
+}

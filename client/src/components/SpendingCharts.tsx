@@ -17,17 +17,8 @@ import { formatCurrency } from "../lib/format";
 import type { CurrencyCode } from "../lib/currencies";
 import type { Category } from "../api/categories";
 import type { Transaction } from "../api/transactions";
+import { categoryColor } from "../lib/categoryVisuals";
 
-const PALETTE = [
-  "#6366f1",
-  "#059669",
-  "#dc2626",
-  "#d97706",
-  "#0891b2",
-  "#7c3aed",
-  "#db2777",
-  "#0d9488",
-];
 
 interface Props {
   transactions: Transaction[];
@@ -80,18 +71,18 @@ export default function SpendingCharts({ transactions, categories, currency }: P
   }, [transactions]);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6">
+    <section className="rounded-2xl border border-line bg-card p-6">
       <div className="flex items-center gap-2">
-        <ChartPie size={15} className="text-slate-400" strokeWidth={2} />
-        <h2 className="text-sm font-semibold text-slate-900">Insights</h2>
+        <ChartPie size={15} className="text-ink-faint" strokeWidth={2} />
+        <h2 className="text-sm font-semibold text-ink">Insights</h2>
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
-          <p className="text-xs font-medium text-slate-500">Spending by category · this month</p>
+          <p className="text-xs font-medium text-ink-dim">Spending by category · this month</p>
 
           {byCategory.length === 0 ? (
-            <p className="mt-16 text-center text-xs text-slate-400">No expenses recorded this month.</p>
+            <p className="mt-16 text-center text-xs text-ink-faint">No expenses recorded this month.</p>
           ) : (
             <>
               <div className="relative mt-2 h-56">
@@ -105,9 +96,10 @@ export default function SpendingCharts({ transactions, categories, currency }: P
                       outerRadius={84}
                       paddingAngle={2}
                       stroke="none"
+                      isAnimationActive={false}
                     >
-                      {byCategory.map((entry, i) => (
-                        <Cell key={entry.name} fill={PALETTE[i % PALETTE.length]} />
+                      {byCategory.map((entry) => (
+                        <Cell key={entry.name} fill={categoryColor(entry.name)} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value) => formatCurrency(Number(value), currency)} />
@@ -115,24 +107,24 @@ export default function SpendingCharts({ transactions, categories, currency }: P
                 </ResponsiveContainer>
 
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-xs text-slate-400">Total</span>
-                  <span className="text-lg font-semibold tabular-nums text-slate-900">
+                  <span className="text-xs text-ink-faint">Total</span>
+                  <span className="text-lg font-semibold tabular-nums text-ink">
                     {formatCurrency(monthTotal, currency)}
                   </span>
                 </div>
               </div>
 
               <ul className="mt-3 space-y-1.5">
-                {byCategory.map((d, i) => (
+                {byCategory.map((d) => (
                   <li key={d.name} className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-2 text-slate-600">
+                    <span className="flex items-center gap-2 text-ink-dim">
                       <span
                         className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: PALETTE[i % PALETTE.length] }}
+                        style={{ backgroundColor: categoryColor(d.name) }}
                       />
                       {d.name}
                     </span>
-                    <span className="tabular-nums text-slate-400">
+                    <span className="tabular-nums text-ink-faint">
                       {formatCurrency(d.value, currency)} · {Math.round((d.value / monthTotal) * 100)}%
                     </span>
                   </li>
@@ -143,14 +135,14 @@ export default function SpendingCharts({ transactions, categories, currency }: P
         </div>
 
         <div>
-          <p className="text-xs font-medium text-slate-500">Income vs expense · last 6 months</p>
+          <p className="text-xs font-medium text-ink-dim">Income vs expense · last 6 months</p>
           <div className="mt-2 h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthly} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} width={56} />
-                <Tooltip formatter={(value) => formatCurrency(Number(value), currency)} cursor={{ fill: "#f8fafc" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#232c40" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#5b6885" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "#5b6885" }} axisLine={false} tickLine={false} width={56} />
+                <Tooltip formatter={(value) => formatCurrency(Number(value), currency)} cursor={{ fill: "#1c2436" }} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="income" name="Income" fill="#059669" radius={[3, 3, 0, 0]} />
                 <Bar dataKey="expense" name="Expense" fill="#e11d48" radius={[3, 3, 0, 0]} />

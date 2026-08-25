@@ -94,22 +94,22 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6">
+    <section className="rounded-2xl border border-line bg-card p-6">
       <div className="flex items-center gap-2">
-        <Repeat size={15} className="text-slate-400" strokeWidth={2} />
-        <h2 className="text-sm font-semibold text-slate-900">Recurring</h2>
+        <Repeat size={15} className="text-ink-faint" strokeWidth={2} />
+        <h2 className="text-sm font-semibold text-ink">Recurring</h2>
       </div>
 
-      {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>}
+      {error && <p className="mt-3 rounded-lg bg-neg/10 px-3 py-2 text-xs text-neg">{error}</p>}
 
       <form onSubmit={handleAdd} className="mt-4 flex flex-wrap items-end gap-3">
         <div className="w-36">
-          <label className="mb-1 block text-xs font-medium text-slate-500">Account</label>
+          <label className="mb-1 block text-xs font-medium text-ink-dim">Account</label>
           <select
              value={effectiveAccountId}
             onChange={(e) => setAccountId(e.target.value)}
             required
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
           >
             {accounts.map((a) => (
               <option key={a._id} value={a._id}>
@@ -119,7 +119,7 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
           </select>
         </div>
         <div className="w-24">
-          <label className="mb-1 block text-xs font-medium text-slate-500">Amount</label>
+          <label className="mb-1 block text-xs font-medium text-ink-dim">Amount</label>
           <input
             type="number"
             step="0.01"
@@ -127,29 +127,29 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             required
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm tabular-nums focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
           />
         </div>
         <div className="w-28">
-          <label className="mb-1 block text-xs font-medium text-slate-500">Type</label>
+          <label className="mb-1 block text-xs font-medium text-ink-dim">Type</label>
           <select
             value={type}
             onChange={(e) => {
               setType(e.target.value as TxType);
               setCategoryId("");
             }}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
           >
             <option value="expense">Expense</option>
             <option value="income">Income</option>
           </select>
         </div>
         <div className="w-28">
-          <label className="mb-1 block text-xs font-medium text-slate-500">Every</label>
+          <label className="mb-1 block text-xs font-medium text-ink-dim">Every</label>
           <select
             value={frequency}
             onChange={(e) => setFrequency(e.target.value as RecurrenceFrequency)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
           >
             <option value="daily">Day</option>
             <option value="weekly">Week</option>
@@ -157,20 +157,20 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
           </select>
         </div>
         <div className="min-w-[140px] flex-1">
-          <label className="mb-1 block text-xs font-medium text-slate-500">Description</label>
+          <label className="mb-1 block text-xs font-medium text-ink-dim">Description</label>
           <input
             placeholder="e.g. Netflix"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
           />
         </div>
         <div className="w-36">
-          <label className="mb-1 block text-xs font-medium text-slate-500">Category</label>
+          <label className="mb-1 block text-xs font-medium text-ink-dim">Category</label>
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
           >
             <option value="">None</option>
             {categories
@@ -185,7 +185,7 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
         <button
           type="submit"
           disabled={accounts.length === 0}
-          className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus size={15} strokeWidth={2.5} />
           Add
@@ -193,12 +193,12 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
       </form>
 
       {items.length > 0 ? (
-        <ul className="mt-5 divide-y divide-slate-100 border-t border-slate-100">
+        <ul className="mt-5 divide-y divide-line border-t border-line">
           {items.map((item) => (
             <li key={item._id} className="group flex items-center justify-between py-3">
               <div className={item.active ? "" : "opacity-50"}>
-                <p className="text-sm text-slate-900">{item.description || "(no description)"}</p>
-                <p className="text-xs text-slate-400">
+                <p className="text-sm text-ink">{item.description || "(no description)"}</p>
+                <p className="text-xs text-ink-faint">
                   Every {item.frequency.replace("ly", "")} · next {formatDate(item.nextRunDate)}
                   {!item.active && " · paused"}
                 </p>
@@ -206,7 +206,7 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
               <div className="flex items-center gap-3">
                 <span
                   className={`text-sm font-medium tabular-nums ${
-                    item.type === "income" ? "text-emerald-600" : "text-rose-600"
+                    item.type === "income" ? "text-pos" : "text-neg"
                   }`}
                 >
                   {item.type === "income" ? "+" : "−"}
@@ -215,14 +215,14 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
                 <button
                   onClick={() => handleToggle(item)}
                   aria-label={item.active ? "Pause" : "Resume"}
-                  className="rounded-md p-1.5 text-slate-300 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                  className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-card-hi hover:text-ink"
                 >
                   {item.active ? <Pause size={13} strokeWidth={2} /> : <Play size={13} strokeWidth={2} />}
                 </button>
                 <button
                   onClick={() => handleDelete(item)}
                   aria-label="Delete recurring transaction"
-                  className="rounded-md p-1.5 text-slate-300 opacity-0 transition-colors hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
+                  className="rounded-md p-1.5 text-ink-faint opacity-0 transition-colors hover:bg-neg/10 hover:text-neg group-hover:opacity-100"
                 >
                   <Trash2 size={13} strokeWidth={2} />
                 </button>
@@ -231,9 +231,9 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
           ))}
         </ul>
       ) : (
-        <div className="mt-5 flex flex-col items-center gap-2 border-t border-slate-100 py-8 text-center">
-          <Repeat size={22} className="text-slate-300" strokeWidth={1.5} />
-          <p className="text-xs text-slate-400">Nothing recurring yet — add a subscription or salary above.</p>
+        <div className="mt-5 flex flex-col items-center gap-2 border-t border-line py-8 text-center">
+          <Repeat size={22} className="text-ink-faint" strokeWidth={1.5} />
+          <p className="text-xs text-ink-faint">Nothing recurring yet — add a subscription or salary above.</p>
         </div>
       )}
     </section>

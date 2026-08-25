@@ -7,7 +7,6 @@ import {
   LogOut,
   Plus,
   Trash2,
-  TrendingUp,
   TrendingDown,
   Receipt,
   Tag,
@@ -28,6 +27,8 @@ import {
 import { getBudgets, upsertBudget, deleteBudget, type Budget } from "../api/budgets";
 import RecurringPanel from "../components/RecurringPanel";
 import SpendingCharts from "../components/SpendingCharts";
+import BalanceHero from "../components/BalanceHero";
+import { categoryIcon, categoryColor } from "../lib/categoryVisuals";
 
 
 const ACCOUNT_ICONS: Record<AccountType, typeof Wallet> = {
@@ -206,38 +207,38 @@ async function handleDeleteBudget(budget: Budget) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-400 text-sm">
+      <div className="min-h-screen flex items-center justify-center bg-canvas text-ink-faint text-sm">
         Loading your ledger…
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-slate-200 bg-white px-5 py-6">
+    <div className="min-h-screen bg-canvas flex">
+      <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-line bg-card px-5 py-6">
         <div className="flex items-center gap-2 px-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
             <Wallet size={16} className="text-white" strokeWidth={2} />
           </div>
-          <span className="text-[15px] font-semibold tracking-tight text-slate-900">Money Tracker</span>
+          <span className="text-[15px] font-semibold tracking-tight text-ink">Money Tracker</span>
         </div>
 
         <nav className="mt-8 flex-1">
-          <div className="flex items-center gap-2.5 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-900">
+          <div className="flex items-center gap-2.5 rounded-lg bg-brand/15 px-3 py-2 text-sm font-medium text-brand-soft">
             <Receipt size={16} strokeWidth={2} />
             Ledger
           </div>
         </nav>
 
-        <div className="border-t border-slate-100 pt-4">
-          <p className="truncate px-1 text-xs text-slate-400">{user?.email}</p>
+        <div className="border-t border-line pt-4">
+          <p className="truncate px-1 text-xs text-ink-faint">{user?.email}</p>
 
           <div className="mt-3 px-1">
-            <label className="mb-1 block text-xs font-medium text-slate-400">Currency</label>
+            <label className="mb-1 block text-xs font-medium text-ink-faint">Currency</label>
             <select
               value={currency}
               onChange={handleCurrencyChange}
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-sm text-slate-700 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+              className="w-full rounded-lg border border-line bg-card-hi px-2.5 py-1.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
             >
               {CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -249,7 +250,7 @@ async function handleDeleteBudget(budget: Budget) {
 
           <button
             onClick={logout}
-            className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-900"
+            className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-dim transition-colors hover:bg-card-hi hover:text-ink"
           >
             <LogOut size={16} strokeWidth={2} />
             Log out
@@ -258,74 +259,37 @@ async function handleDeleteBudget(budget: Budget) {
       </aside>
 
       <div className="flex-1 min-w-0">
-        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 md:hidden">
+        <header className="flex items-center justify-between border-b border-line bg-card px-6 py-4 md:hidden">
           <div className="flex items-center gap-2">
-            <Wallet size={18} className="text-slate-900" />
-            <span className="font-semibold text-slate-900">Money Tracker</span>
+            <Wallet size={18} className="text-ink" />
+            <span className="font-semibold text-ink">Money Tracker</span>
           </div>
-          <button onClick={logout} className="text-sm font-medium text-slate-500">
+          <button onClick={logout} className="text-sm font-medium text-ink-dim">
             Log out
           </button>
         </header>
 
         <main className="mx-auto max-w-6xl px-6 py-8">
           {error && (
-            <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
+            <p className="mb-6 rounded-lg border border-neg/30 bg-neg/10 px-4 py-2.5 text-sm text-neg">
               {error}
             </p>
           )}
 
-          {summary && (
-            <section className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <div className="px-7 py-6">
-                <p className="text-sm font-medium text-slate-500">Current balance</p>
-                <p
-                  className={`mt-1 text-4xl font-semibold tabular-nums tracking-tight ${
-                    summary.balance >= 0 ? "text-slate-900" : "text-rose-600"
-                  }`}
-                >
-                  {formatCurrency(summary.balance, currency)}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 divide-x divide-slate-100 border-t border-slate-100">
-                <div className="flex items-center gap-3 px-7 py-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50">
-                    <TrendingUp size={16} className="text-emerald-600" strokeWidth={2.25} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-slate-400">Income</p>
-                    <p className="text-base font-semibold tabular-nums text-slate-900">
-                      {formatCurrency(summary.totalIncome, currency)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 px-7 py-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-rose-50">
-                    <TrendingDown size={16} className="text-rose-600" strokeWidth={2.25} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-slate-400">Expense</p>
-                    <p className="text-base font-semibold tabular-nums text-slate-900">
-                      {formatCurrency(summary.totalExpense, currency)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
+                    {summary && <BalanceHero summary={summary} currency={currency} />}
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="space-y-6 lg:col-span-2">
-              <section className="rounded-2xl border border-slate-200 bg-white p-6">
-                <h2 className="text-sm font-semibold text-slate-900">Add transaction</h2>
+              <section className="rounded-2xl border border-line bg-card p-6">
+                <h2 className="text-sm font-semibold text-ink">Add transaction</h2>
                 <form onSubmit={handleAddTransaction} className="mt-4 flex flex-wrap items-end gap-3">
                   <div className="w-40">
-                    <label className="mb-1 block text-xs font-medium text-slate-500">Account</label>
+                    <label className="mb-1 block text-xs font-medium text-ink-dim">Account</label>
                     <select
                       value={txAccountId}
                       onChange={(e) => setTxAccountId(e.target.value)}
                       required
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                     >
                       {accounts.map((a) => (
                         <option key={a._id} value={a._id}>
@@ -335,7 +299,7 @@ async function handleDeleteBudget(budget: Budget) {
                     </select>
                   </div>
                   <div className="w-28">
-                    <label className="mb-1 block text-xs font-medium text-slate-500">Amount</label>
+                    <label className="mb-1 block text-xs font-medium text-ink-dim">Amount</label>
                     <input
                       type="number"
                       step="0.01"
@@ -343,38 +307,38 @@ async function handleDeleteBudget(budget: Budget) {
                       value={txAmount}
                       onChange={(e) => setTxAmount(e.target.value)}
                       required
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      className="w-full rounded-lg border border-line px-3 py-2 text-sm tabular-nums focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                     />
                   </div>
                   <div className="w-32">
-                    <label className="mb-1 block text-xs font-medium text-slate-500">Type</label>
+                    <label className="mb-1 block text-xs font-medium text-ink-dim">Type</label>
                     <select
                       value={txType}
                       onChange={(e) => {
                         setTxType(e.target.value as TxType);
                         setTxCategoryId("");
                       }}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                     >
                       <option value="expense">Expense</option>
                       <option value="income">Income</option>
                     </select>
                   </div>
                   <div className="min-w-[160px] flex-1">
-                    <label className="mb-1 block text-xs font-medium text-slate-500">Description</label>
+                    <label className="mb-1 block text-xs font-medium text-ink-dim">Description</label>
                     <input
                       placeholder="e.g. Weekly groceries"
                       value={txDescription}
                       onChange={(e) => setTxDescription(e.target.value)}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                     />
                   </div>
                   <div className="w-40">
-                    <label className="mb-1 block text-xs font-medium text-slate-500">Category</label>
+                    <label className="mb-1 block text-xs font-medium text-ink-dim">Category</label>
                     <select
                       value={txCategoryId}
                       onChange={(e) => setTxCategoryId(e.target.value)}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                     >
                       <option value="">None</option>
                       {categories
@@ -389,7 +353,7 @@ async function handleDeleteBudget(budget: Budget) {
                   <button
                     type="submit"
                     disabled={accounts.length === 0}
-                    className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Plus size={15} strokeWidth={2.5} />
                     Add
@@ -397,19 +361,19 @@ async function handleDeleteBudget(budget: Budget) {
                 </form>
               </section>
 
-              <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                <h2 className="px-6 pt-5 text-sm font-semibold text-slate-900">Transactions</h2>
+              <section className="overflow-hidden rounded-2xl border border-line bg-card">
+                <h2 className="px-6 pt-5 text-sm font-semibold text-ink">Transactions</h2>
 
                 {transactions.length === 0 ? (
                   <div className="flex flex-col items-center gap-2 px-6 py-14 text-center">
-                    <Receipt size={28} className="text-slate-300" strokeWidth={1.5} />
-                    <p className="text-sm text-slate-400">No transactions yet — add your first one above.</p>
+                    <Receipt size={28} className="text-ink-faint" strokeWidth={1.5} />
+                    <p className="text-sm text-ink-faint">No transactions yet — add your first one above.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="mt-4 w-full text-sm">
                       <thead>
-                        <tr className="border-y border-slate-100 text-left text-xs font-medium uppercase tracking-wide text-slate-400">
+                        <tr className="border-y border-line text-left text-xs font-medium uppercase tracking-wide text-ink-faint">
                           <th className="px-6 py-2.5 font-medium">Date</th>
                           <th className="px-6 py-2.5 font-medium">Description</th>
                           <th className="px-6 py-2.5 font-medium">Account</th>
@@ -418,33 +382,41 @@ async function handleDeleteBudget(budget: Budget) {
                           <th className="w-10 px-6 py-2.5" />
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-line">
                         {transactions.map((t) => {
                           const category = t.category ? categoryById.get(t.category) : undefined;
                           const account = accountById.get(t.account);
                           return (
                             <tr key={t._id} className="group">
-                              <td className="whitespace-nowrap px-6 py-3.5 text-slate-500">{formatDate(t.date)}</td>
-                              <td className="px-6 py-3.5 text-slate-900">{t.description || "—"}</td>
-                              <td className="whitespace-nowrap px-6 py-3.5 text-slate-500">
+                              <td className="whitespace-nowrap px-6 py-3.5 text-ink-dim">{formatDate(t.date)}</td>
+                              <td className="px-6 py-3.5 text-ink">{t.description || "—"}</td>
+                              <td className="whitespace-nowrap px-6 py-3.5 text-ink-dim">
                                 {account?.name ?? "—"}
                               </td>
                               <td className="px-6 py-3.5">
                                 {category ? (
-                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
-                                    <span
-                                      className="h-1.5 w-1.5 rounded-full"
-                                      style={{ backgroundColor: category.color }}
-                                    />
-                                    {category.name}
-                                  </span>
+                                  (() => {
+                                    const Icon = categoryIcon(category.name);
+                                    const color = categoryColor(category.name);
+                                    return (
+                                      <span className="inline-flex items-center gap-2 rounded-full bg-card-hi py-1 pl-1 pr-3 text-xs font-medium text-ink-dim">
+                                        <span
+                                          className="flex h-5 w-5 items-center justify-center rounded-full"
+                                          style={{ backgroundColor: `${color}33` }}
+                                        >
+                                          <Icon size={11} style={{ color }} strokeWidth={2.4} />
+                                        </span>
+                                        {category.name}
+                                      </span>
+                                    );
+                                  })()
                                 ) : (
-                                  <span className="text-xs text-slate-300">Uncategorized</span>
+                                  <span className="text-xs text-ink-faint">Uncategorized</span>
                                 )}
                               </td>
                               <td
                                 className={`whitespace-nowrap px-6 py-3.5 text-right font-medium tabular-nums ${
-                                  t.type === "income" ? "text-emerald-600" : "text-rose-600"
+                                  t.type === "income" ? "text-pos" : "text-neg"
                                 }`}
                               >
                                 {formatSignedCurrency(t.amount, t.type, currency)}
@@ -453,7 +425,7 @@ async function handleDeleteBudget(budget: Budget) {
                                 <button
                                   onClick={() => handleDeleteTransaction(t)}
                                   aria-label="Delete transaction"
-                                  className="rounded-md p-1.5 text-slate-300 opacity-0 transition-colors hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
+                                  className="rounded-md p-1.5 text-ink-faint opacity-0 transition-colors hover:bg-neg/10 hover:text-neg group-hover:opacity-100"
                                 >
                                   <Trash2 size={14} strokeWidth={2} />
                                 </button>
@@ -480,8 +452,8 @@ async function handleDeleteBudget(budget: Budget) {
             </div>
 
             <div className="space-y-6">
-              <section className="rounded-2xl border border-slate-200 bg-white p-6">
-                <h2 className="text-sm font-semibold text-slate-900">Accounts</h2>
+              <section className="rounded-2xl border border-line bg-card p-6">
+                <h2 className="text-sm font-semibold text-ink">Accounts</h2>
 
                 <form onSubmit={handleAddAccount} className="mt-4 space-y-2">
                   <input
@@ -489,13 +461,13 @@ async function handleDeleteBudget(budget: Budget) {
                     value={acctName}
                     onChange={(e) => setAcctName(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                   />
                   <div className="flex gap-2">
                     <select
                       value={acctType}
                       onChange={(e) => setAcctType(e.target.value as AccountType)}
-                      className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      className="flex-1 rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                     >
                       <option value="cash">Cash</option>
                       <option value="bank">Bank</option>
@@ -504,7 +476,7 @@ async function handleDeleteBudget(budget: Budget) {
                     </select>
                     <button
                       type="submit"
-                      className="flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                      className="flex items-center gap-1 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white transition-colors hover:brightness-110"
                     >
                       <Plus size={14} strokeWidth={2.5} />
                       Add
@@ -513,12 +485,12 @@ async function handleDeleteBudget(budget: Budget) {
                 </form>
 
                 {accounts.length > 0 ? (
-                  <ul className="mt-5 space-y-1 border-t border-slate-100 pt-4">
+                  <ul className="mt-5 space-y-1 border-t border-line pt-4">
                     {accounts.map((a) => {
                       const Icon = ACCOUNT_ICONS[a.type];
                       return (
                         <li key={a._id} className="group flex items-center justify-between rounded-lg px-1 py-2">
-                          <span className="flex items-center gap-2.5 text-sm text-slate-700">
+                          <span className="flex items-center gap-2.5 text-sm text-ink">
                             <span
                               className="flex h-7 w-7 items-center justify-center rounded-full"
                               style={{ backgroundColor: `${a.color}1a` }}
@@ -530,7 +502,7 @@ async function handleDeleteBudget(budget: Budget) {
                           <span className="flex items-center gap-2">
                             <span
                               className={`text-sm font-medium tabular-nums ${
-                                a.balance < 0 ? "text-rose-600" : "text-slate-900"
+                                a.balance < 0 ? "text-neg" : "text-ink"
                               }`}
                             >
                               {formatCurrency(a.balance, currency)}
@@ -538,7 +510,7 @@ async function handleDeleteBudget(budget: Budget) {
                             <button
                               onClick={() => handleDeleteAccount(a)}
                               aria-label="Delete account"
-                              className="rounded-md p-1 text-slate-300 opacity-0 transition-colors hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"
+                              className="rounded-md p-1 text-ink-faint opacity-0 transition-colors hover:bg-neg/10 hover:text-neg group-hover:opacity-100"
                             >
                               <Trash2 size={13} strokeWidth={2} />
                             </button>
@@ -548,22 +520,22 @@ async function handleDeleteBudget(budget: Budget) {
                     })}
                   </ul>
                 ) : (
-                  <div className="mt-5 flex flex-col items-center gap-2 border-t border-slate-100 py-6 text-center">
-                    <Wallet size={20} className="text-slate-300" strokeWidth={1.5} />
-                    <p className="text-xs text-slate-400">No accounts yet.</p>
+                  <div className="mt-5 flex flex-col items-center gap-2 border-t border-line py-6 text-center">
+                    <Wallet size={20} className="text-ink-faint" strokeWidth={1.5} />
+                    <p className="text-xs text-ink-faint">No accounts yet.</p>
                   </div>
                 )}
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-6">
-                <h2 className="text-sm font-semibold text-slate-900">Budgets this month</h2>
+              <section className="rounded-2xl border border-line bg-card p-6">
+                <h2 className="text-sm font-semibold text-ink">Budgets this month</h2>
 
                 <form onSubmit={handleAddBudget} className="mt-4 space-y-2">
                   <select
                     value={budgetCategoryId}
                     onChange={(e) => setBudgetCategoryId(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                   >
                     <option value="">Select category…</option>
                     {categories
@@ -582,11 +554,11 @@ async function handleDeleteBudget(budget: Budget) {
                       value={budgetLimit}
                       onChange={(e) => setBudgetLimit(e.target.value)}
                       required
-                      className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      className="flex-1 rounded-lg border border-line px-3 py-2 text-sm tabular-nums focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                     />
                     <button
                       type="submit"
-                      className="flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                      className="flex items-center gap-1 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white transition-colors hover:brightness-110"
                     >
                       <Plus size={14} strokeWidth={2.5} />
                       Set
@@ -594,51 +566,77 @@ async function handleDeleteBudget(budget: Budget) {
                   </div>
                 </form>
 
-                {budgets.length > 0 ? (
-                  <ul className="mt-5 space-y-3 border-t border-slate-100 pt-4">
+                                {budgets.length > 0 ? (
+                  <ul className="mt-5 space-y-2 border-t border-line pt-4">
                     {budgets.map((b) => {
                       const pct = Math.min(100, (b.spent / b.limit) * 100);
-                      const barColor = pct >= 100 ? "#dc2626" : pct >= 70 ? "#d97706" : "#059669";
+                      const over = b.remaining < 0;
+                      const ringColor = over ? "#fb7185" : pct >= 70 ? "#fbbf24" : "#34d399";
+                      const C = 2 * Math.PI * 15.5;
+                      const Icon = categoryIcon(b.categoryName);
                       return (
-                        <li key={b._id} className="group">
-                          <div className="mb-1 flex items-center justify-between text-xs">
-                            <span className="font-medium text-slate-600">{b.categoryName}</span>
-                            <span className="flex items-center gap-2">
-                              <span className="tabular-nums text-slate-400">
-                                {formatCurrency(b.spent, currency)} / {formatCurrency(b.limit, currency)}
-                              </span>
+                        <li
+                          key={b._id}
+                          className="group flex items-center gap-3 rounded-xl px-1 py-2 transition-colors hover:bg-card-hi"
+                        >
+                          <div className="relative h-11 w-11 shrink-0">
+                            <svg viewBox="0 0 40 40" className="h-11 w-11 -rotate-90">
+                              <circle cx="20" cy="20" r="15.5" fill="none" strokeWidth="4" className="stroke-line" />
+                              <circle
+                                cx="20"
+                                cy="20"
+                                r="15.5"
+                                fill="none"
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                                stroke={ringColor}
+                                strokeDasharray={C}
+                                strokeDashoffset={C - (C * pct) / 100}
+                                style={{ transition: "stroke-dashoffset 500ms ease" }}
+                              />
+                            </svg>
+                            <span className="absolute inset-0 flex items-center justify-center">
+                              <Icon size={13} style={{ color: ringColor }} strokeWidth={2.3} />
+                            </span>
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="truncate text-sm font-medium text-ink">{b.categoryName}</span>
                               <button
                                 onClick={() => handleDeleteBudget(b)}
                                 aria-label="Delete budget"
-                                className="rounded-md p-0.5 text-slate-300 opacity-0 transition-colors hover:text-rose-600 group-hover:opacity-100"
+                                className="shrink-0 rounded-md p-0.5 text-ink-faint opacity-0 transition-colors hover:text-neg group-hover:opacity-100"
                               >
                                 <Trash2 size={12} strokeWidth={2} />
                               </button>
-                            </span>
-                          </div>
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                            <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: barColor }} />
-                          </div>
-                          {b.remaining < 0 && (
-                            <p className="mt-1 text-xs text-rose-600">
-                              {formatCurrency(Math.abs(b.remaining), currency)} over budget
+                            </div>
+                            <p className="mt-0.5 text-[11px] tabular-nums text-ink-faint">
+                              {formatCurrency(b.spent, currency)} of {formatCurrency(b.limit, currency)}
                             </p>
-                          )}
+                            <p
+                              className={`text-[11px] font-medium tabular-nums ${over ? "text-neg" : "text-ink-dim"}`}
+                            >
+                              {over
+                                ? `${formatCurrency(Math.abs(b.remaining), currency)} over`
+                                : `${formatCurrency(b.remaining, currency)} left`}
+                            </p>
+                          </div>
                         </li>
                       );
                     })}
                   </ul>
                 ) : (
-                  <div className="mt-5 flex flex-col items-center gap-2 border-t border-slate-100 py-6 text-center">
-                    <TrendingDown size={20} className="text-slate-300" strokeWidth={1.5} />
-                    <p className="text-xs text-slate-400">No budgets set for this month.</p>
+                  <div className="mt-5 flex flex-col items-center gap-2 border-t border-line py-6 text-center">
+                    <TrendingDown size={20} className="text-ink-faint" strokeWidth={1.5} />
+                    <p className="text-xs text-ink-faint">No budgets set for this month.</p>
                   </div>
                 )}
               </section>
 
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-6">
-                <h2 className="text-sm font-semibold text-slate-900">Categories</h2>
+              <section className="rounded-2xl border border-line bg-card p-6">
+                <h2 className="text-sm font-semibold text-ink">Categories</h2>
 
                 <form onSubmit={handleAddCategory} className="mt-4 space-y-2">
                   <input
@@ -646,20 +644,20 @@ async function handleDeleteBudget(budget: Budget) {
                     value={catName}
                     onChange={(e) => setCatName(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                   />
                   <div className="flex gap-2">
                     <select
                       value={catType}
                       onChange={(e) => setCatType(e.target.value as TxType)}
-                      className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      className="flex-1 rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
                     >
                       <option value="expense">Expense</option>
                       <option value="income">Income</option>
                     </select>
                     <button
                       type="submit"
-                      className="flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                      className="flex items-center gap-1 rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white transition-colors hover:brightness-110"
                     >
                       <Plus size={14} strokeWidth={2.5} />
                       Add
@@ -667,22 +665,41 @@ async function handleDeleteBudget(budget: Budget) {
                   </div>
                 </form>
 
-                {categories.length > 0 ? (
-                  <ul className="mt-5 space-y-1.5 border-t border-slate-100 pt-4">
-                    {categories.map((c) => (
-                      <li key={c._id} className="flex items-center justify-between py-1 text-sm">
-                        <span className="flex items-center gap-2 text-slate-700">
-                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
-                          {c.name}
-                        </span>
-                        <span className="text-xs capitalize text-slate-400">{c.type}</span>
-                      </li>
-                    ))}
+                                {categories.length > 0 ? (
+                  <ul className="mt-5 space-y-1 border-t border-line pt-4">
+                    {categories.map((c) => {
+                      const Icon = categoryIcon(c.name);
+                      const color = categoryColor(c._id);
+                      return (
+                        <li
+                          key={c._id}
+                          className="flex items-center justify-between rounded-xl px-1 py-2 transition-colors hover:bg-card-hi"
+                        >
+                          <span className="flex items-center gap-3 text-sm text-ink">
+                            <span
+                              className="flex h-8 w-8 items-center justify-center rounded-full"
+                              style={{ backgroundColor: `${color}22` }}
+                            >
+                              <Icon size={15} style={{ color }} strokeWidth={2.2} />
+                            </span>
+                            {c.name}
+                          </span>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                              c.type === "income" ? "bg-pos/15 text-pos" : "bg-neg/15 text-neg"
+                            }`}
+                          >
+                            {c.type}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
+                  
                 ) : (
-                  <div className="mt-5 flex flex-col items-center gap-2 border-t border-slate-100 py-6 text-center">
-                    <Tag size={20} className="text-slate-300" strokeWidth={1.5} />
-                    <p className="text-xs text-slate-400">No categories yet.</p>
+                  <div className="mt-5 flex flex-col items-center gap-2 border-t border-line py-6 text-center">
+                    <Tag size={20} className="text-ink-faint" strokeWidth={1.5} />
+                    <p className="text-xs text-ink-faint">No categories yet.</p>
                   </div>
                 )}
               </section>

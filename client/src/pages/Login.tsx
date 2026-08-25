@@ -26,51 +26,63 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900">
-            <Wallet size={18} className="text-white" strokeWidth={2} />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-4">
+      <div className="pointer-events-none absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-brand/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 right-0 h-80 w-80 rounded-full bg-info/10 blur-3xl" />
+
+      <div className="relative w-full max-w-sm">
+        <div className="mb-7 flex flex-col items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-info shadow-lg shadow-brand/30">
+            <Wallet size={22} className="text-white" strokeWidth={2.2} />
           </div>
-          <span className="text-sm font-semibold tracking-tight text-slate-900">Money Tracker</span>
+          <div className="text-center">
+            <h1 className="text-lg font-semibold tracking-tight text-ink">Money Tracker</h1>
+            <p className="text-xs text-ink-faint">Every transaction, in one place</p>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-8">
-          <h1 className="mb-6 text-xl font-semibold text-slate-900">Log in</h1>
+        <div className="rounded-2xl border border-line bg-card p-7 shadow-2xl shadow-black/40">
+          <h2 className="mb-6 text-base font-semibold text-ink">Welcome back</h2>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+              <label className="mb-1.5 block text-xs font-medium text-ink-dim">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                className="w-full rounded-xl border border-line bg-card-hi px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-faint focus:border-brand focus:ring-2 focus:ring-brand/30"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Password</label>
+              <label className="mb-1.5 block text-xs font-medium text-ink-dim">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900"
+                className="w-full rounded-xl border border-line bg-card-hi px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-faint focus:border-brand focus:ring-2 focus:ring-brand/30"
               />
             </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            {error && (
+              <p className="rounded-lg border border-neg/30 bg-neg/10 px-3 py-2 text-xs text-neg">{error}</p>
+            )}
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-slate-900 py-2 font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-xl bg-gradient-to-r from-brand to-info py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? "Logging in…" : "Log in"}
             </button>
           </form>
-          <p className="mt-5 text-center text-sm text-slate-500">
+
+          <p className="mt-5 text-center text-xs text-ink-faint">
             No account?{" "}
-            <Link to="/register" className="font-medium text-slate-900 hover:underline">
-              Register
+            <Link to="/register" className="font-medium text-brand-soft hover:underline">
+              Create one
             </Link>
           </p>
         </div>
