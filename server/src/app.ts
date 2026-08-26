@@ -10,15 +10,32 @@ import { recurringRouter } from "./routes/recurring.js";
 
 export const app = express();
 
-app.use(cors());
+/**
+ * In production only the deployed frontend may call the API. CLIENT_ORIGIN
+ * accepts a comma-separated list so preview deployments can be allowed too.
+ * Locally (no CLIENT_ORIGIN set) any origin is allowed for convenience.
+ */
+const allowedOrigins = (process.env.CLIENT_ORIGIN ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+  }),
+);
+
 app.use(express.json());
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
+app.use("/api/auth", authRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/transactions", transactionsRouter);
 app.use("/api/accounts", accountsRouter);
 app.use("/api/budgets", budgetsRouter);
 app.use("/api/stats", statsRouter);
-app.use("/api/auth", authRouter);
 app.use("/api/recurring", recurringRouter);
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
-});

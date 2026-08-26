@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Receipt } from "lucide-react";
+import { ArrowRight, Plus, Receipt } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 import { useReferenceData } from "../hooks/useReferenceData";
 import { formatCurrency, formatSignedCurrency, formatDate } from "../lib/format";
@@ -10,11 +10,14 @@ import SpendingCharts from "../components/SpendingCharts";
 import PageHeader from "../components/PageHeader";
 import { getSummary, getTransactions, type Summary, type Transaction } from "../api/transactions";
 import { getOverview, type Overview as OverviewStats } from "../api/stats";
+import AddTransactionModal from "../components/AddTransactionModal";
+
 
 export default function Overview() {
   const { user } = useAuth();
   const currency = user?.currency ?? "USD";
-  const { categories, accounts } = useReferenceData();
+  const { categories, accounts, reload: reloadReference } = useReferenceData();
+  const [showAdd, setShowAdd] = useState(false);
 
   const [summary, setSummary] = useState<Summary | null>(null);
   const [stats, setStats] = useState<OverviewStats | null>(null);
@@ -54,7 +57,30 @@ export default function Overview() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <PageHeader title="Overview" subtitle="Where your money stands right now" />
+            <PageHeader
+        title="Overview"
+        subtitle="Where your money stands right now"
+        action={
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand to-info px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition hover:brightness-110"
+          >
+            <Plus size={15} strokeWidth={2.5} />
+            Add transaction
+          </button>
+        }
+      />
+
+      <AddTransactionModal
+        open={showAdd}
+        accounts={accounts}
+        categories={categories}
+        onClose={() => setShowAdd(false)}
+        onCreated={() => {
+          load();
+          reloadReference();
+        }}
+      />
 
       {error && (
         <p className="mb-6 rounded-lg border border-neg/30 bg-neg/10 px-4 py-2.5 text-sm text-neg">{error}</p>
