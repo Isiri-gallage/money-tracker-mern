@@ -58,3 +58,53 @@ jobs:
       - name: Build
         working-directory: client
         run: npm run build
+
+  docker:
+    name: Docker images build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          push: false
+          load: true
+          tags: money-tracker-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build web image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          push: false
+          load: true
+          tags: money-tracker-web:ci
+          build-args: |
+            VITE_API_URL=https://api.example.com/api
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test API image
+        run: |
+          docker run -d --name api-smoke -p 4000:4000 \
+            -e MONGODB_URI=mongodb://127.0.0.1:27017/unused \
+            -e JWT_SECRET=ci-smoke-secret \
+            money-tracker-api:ci
+          sleep 5
+          docker logs api-smoke
+          docker rm -f api-smoke
+
+      - name: Smoke test web image
+        run: |
+          docker run -d --name web-smoke -p 8080:80 money-tracker-web:ci
+          sleep 3
+          curl -fsS -o /dev/null -w "index: %{http_code}\n" http://localhost:8080/
+          curl -fsS -o /dev/null -w "spa fallback: %{http_code}\n" http://localhost:8080/transactions
+          docker rm -f web-smoke

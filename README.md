@@ -177,16 +177,41 @@ All routes except `/api/health`, `/api/auth/register` and `/api/auth/login` requ
 
 ---
 
+## Running with Docker
+
+The whole stack — MongoDB, API and web app — runs with one command:
+
+```bash
+docker compose up --build
+```
+
+The app is then on http://localhost:5173 and the API on http://localhost:4000. Mongo data persists in a named volume between runs.
+
+Both services use multi-stage builds: the API compiles TypeScript in a build stage and ships only `dist/` plus production dependencies, running as a non-root user. The client builds the Vite bundle and serves it from nginx.
+
+> **Note:** Vite inlines environment variables at *build* time, so `VITE_API_URL` is a Docker **build argument**, not a runtime variable. Changing the API URL means rebuilding the client image.
+
+---
+
 ## Deployment
 
 The frontend is a static bundle and the backend is a Node service, so they deploy separately.
 
 **Backend** (Render, Railway, Fly.io, …)
 
+A [`render.yaml`](render.yaml) blueprint is included — in Render, choose **New > Blueprint** and point it at this repository rather than configuring the service by hand. It sets the build and start commands, pins Node 20, wires the health check to `/api/health`, and generates `JWT_SECRET` automatically. You supply `MONGODB_URI` and `CLIENT_ORIGIN` in the dashboard.
+
+To configure manually instead:
+
 - Root directory: `server`
-- Build command: `npm install && npm run build`
+- Build command: `npm ci && npm run build`
 - Start command: `npm start`
+- Health check path: `/api/health`
 - Environment variables: `MONGODB_URI`, `JWT_SECRET`, `CLIENT_ORIGIN` (your deployed frontend URL)
+
+> Free-tier services on most hosts sleep after ~15 minutes idle, so the first request after a pause can take up to a minute. For a demo you'll want either a paid instance or an uptime monitor pinging `/api/health`.
+
+> The recurring-transaction scheduler keeps an in-process timer, so the API needs a long-running container. It will not work correctly on request-scoped serverless platforms (Vercel Functions, AWS Lambda) without moving the job to an external scheduler.
 
 **Frontend** (Vercel, Netlify, Cloudflare Pages, …)
 

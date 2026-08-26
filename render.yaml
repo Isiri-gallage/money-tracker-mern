@@ -1,0 +1,25 @@
+# Render Blueprint — infrastructure as code.
+# In the Render dashboard: New > Blueprint, point it at this repository, and
+# Render provisions the service from this file instead of manual configuration.
+
+services:
+  - type: web
+    name: money-tracker-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      # Set in the dashboard — never committed.
+      - key: MONGODB_URI
+        sync: false
+      # Comma-separated frontend origins allowed to call the API.
+      - key: CLIENT_ORIGIN
+        sync: false
+      # Render generates a strong random value on first deploy.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_VERSION
+        value: "20"
