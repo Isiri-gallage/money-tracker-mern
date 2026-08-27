@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 import ChatBubble from "./ChatBubble";
+import InstallButton from "./InstallButton";
 
 const NAV_ITEMS = [
   { to: "/", label: "Overview", icon: LayoutDashboard, end: true },
@@ -62,9 +63,10 @@ export default function AppLayout() {
     </div>
   );
 
-  const footer = (
+    const footer = (
     <div className="border-t border-line pt-4">
       <p className="truncate px-1 text-xs text-ink-faint">{user?.email}</p>
+      <InstallButton />
       <button
         onClick={logout}
         className="mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-ink-dim transition-colors hover:bg-card-hi hover:text-ink"
