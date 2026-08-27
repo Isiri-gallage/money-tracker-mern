@@ -7,6 +7,7 @@ import { accountsRouter } from "./routes/accounts.js";
 import { budgetsRouter } from "./routes/budgets.js";
 import { statsRouter } from "./routes/stats.js";
 import { recurringRouter } from "./routes/recurring.js";
+import { chatRouter } from "./routes/chat.js";
 
 export const app = express();
 
@@ -39,3 +40,4 @@ app.use("/api/accounts", accountsRouter);
 app.use("/api/budgets", budgetsRouter);
 app.use("/api/stats", statsRouter);
 app.use("/api/recurring", recurringRouter);
+app.use("/api/chat", chatRouter);

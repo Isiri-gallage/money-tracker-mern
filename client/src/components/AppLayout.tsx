@@ -11,8 +11,10 @@ import {
   LogOut,
   Menu,
   X,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "../context/useAuth";
+import ChatBubble from "./ChatBubble";
 
 const NAV_ITEMS = [
   { to: "/", label: "Overview", icon: LayoutDashboard, end: true },
@@ -20,6 +22,7 @@ const NAV_ITEMS = [
   { to: "/budgets", label: "Budgets", icon: Target, end: false },
   { to: "/accounts", label: "Accounts", icon: Landmark, end: false },
   { to: "/recurring", label: "Recurring", icon: Repeat, end: false },
+  { to: "/chat", label: "AI Assistant", icon: Sparkles, end: false },
   { to: "/settings", label: "Settings", icon: Settings, end: false },
 ];
 
@@ -123,6 +126,7 @@ export default function AppLayout() {
           <Outlet />
         </main>
       </div>
+      <ChatBubble />
     </div>
   );
 }
