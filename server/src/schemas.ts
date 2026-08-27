@@ -65,3 +65,21 @@ export const chatSchema = z.object({
     .optional()
     .default([]),
 });
+
+export const goalSchema = z.object({
+  name: z.string().trim().min(1, "name is required"),
+  targetAmount: z.number().positive("targetAmount must be a positive number"),
+  targetDate: z.string().optional(),
+  color: z.string().trim().optional(),
+});
+
+export const goalUpdateSchema = z.object({
+  name: z.string().trim().min(1).optional(),
+  targetAmount: z.number().positive().optional(),
+  targetDate: z.string().optional(),
+  color: z.string().trim().optional(),
+});
+
+export const goalContributionSchema = z.object({
+  amount: z.number().refine((n) => n !== 0, "amount cannot be zero"),
+});

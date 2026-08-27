@@ -9,6 +9,7 @@ import { statsRouter } from "./routes/stats.js";
 import { recurringRouter } from "./routes/recurring.js";
 import { chatRouter } from "./routes/chat.js";
 import { apiLimiter, authLimiter, chatLimiter } from "./middleware/rateLimit.js";
+import { goalsRouter } from "./routes/goals.js";
 
 export const app = express();
 app.set("trust proxy", 1);
@@ -46,3 +47,4 @@ app.use("/api/budgets", budgetsRouter);
 app.use("/api/stats", statsRouter);
 app.use("/api/recurring", recurringRouter);
 app.use("/api/chat", chatLimiter, chatRouter);
+app.use("/api/goals", goalsRouter);

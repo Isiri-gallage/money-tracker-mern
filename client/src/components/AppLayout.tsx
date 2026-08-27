@@ -7,6 +7,7 @@ import {
   Target,
   Landmark,
   Repeat,
+  PiggyBank,
   Settings,
   LogOut,
   Menu,
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { to: "/budgets", label: "Budgets", icon: Target, end: false },
   { to: "/accounts", label: "Accounts", icon: Landmark, end: false },
   { to: "/recurring", label: "Recurring", icon: Repeat, end: false },
+  { to: "/goals", label: "Goals", icon: PiggyBank, end: false },
   { to: "/chat", label: "AI Assistant", icon: Sparkles, end: false },
   { to: "/settings", label: "Settings", icon: Settings, end: false },
 ];

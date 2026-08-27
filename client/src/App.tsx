@@ -11,6 +11,7 @@ import AccountsPage from "./pages/AccountsPage";
 import RecurringPage from "./pages/RecurringPage";
 import SettingsPage from "./pages/SettingsPage";
 import ChatPage from "./pages/ChatPage";
+import GoalsPage from "./pages/GoalsPage";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -36,6 +37,7 @@ function App() {
         <Route path="/accounts" element={<AccountsPage />} />
         <Route path="/recurring" element={<RecurringPage />} />
         <Route path="/chat" element={<ChatPage />} />
+        <Route path="/goals" element={<GoalsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
