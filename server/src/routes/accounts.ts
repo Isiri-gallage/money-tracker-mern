@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { requireAuth, AuthRequest } from "../middleware/auth.js";
 import { Account, type AccountType } from "../models/Account.js";
 import { Transaction } from "../models/Transaction.js";
+import { validateBody } from "../middleware/validate.js";
+import { accountSchema } from "../schemas.js";
 
 export const accountsRouter = Router();
 
@@ -40,12 +42,8 @@ accountsRouter.get("/", async (req: AuthRequest, res) => {
   res.json(result);
 });
 
-accountsRouter.post("/", async (req: AuthRequest, res) => {
-  const { name, type, color } = req.body as { name?: string; type?: AccountType; color?: string };
-
-  if (!name) {
-    return res.status(400).json({ error: "name is required" });
-  }
+accountsRouter.post("/", validateBody(accountSchema), async (req: AuthRequest, res) => {
+  const { name, type, color } = req.body as { name: string; type?: AccountType; color?: string };
 
   const account = await Account.create({
     user: req.userId,

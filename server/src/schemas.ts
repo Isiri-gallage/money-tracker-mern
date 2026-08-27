@@ -1,0 +1,67 @@
+import { z } from "zod";
+import { CURRENCIES } from "./constants.js";
+
+const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, "must be a valid id");
+
+export const registerSchema = z.object({
+  email: z.string().trim().toLowerCase().email("must be a valid email"),
+  password: z.string().min(6, "password must be at least 6 characters"),
+});
+
+export const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().email("must be a valid email"),
+  password: z.string().min(1, "password is required"),
+});
+
+export const updateMeSchema = z.object({
+  currency: z.enum(CURRENCIES),
+});
+
+export const categorySchema = z.object({
+  name: z.string().trim().min(1, "name is required"),
+  type: z.enum(["income", "expense"]),
+  color: z.string().trim().optional(),
+});
+
+export const accountSchema = z.object({
+  name: z.string().trim().min(1, "name is required"),
+  type: z.enum(["cash", "bank", "card", "other"]).optional(),
+  color: z.string().trim().optional(),
+});
+
+export const transactionSchema = z.object({
+  amount: z.number().positive("amount must be a positive number"),
+  type: z.enum(["income", "expense"]),
+  description: z.string().trim().optional(),
+  date: z.string().optional(),
+  categoryId: objectId.optional(),
+  accountId: objectId,
+});
+
+export const budgetSchema = z.object({
+  categoryId: objectId,
+  month: z.string().regex(/^\d{4}-\d{2}$/, "month must be in YYYY-MM format"),
+  limit: z.number().positive("limit must be a positive number"),
+});
+
+export const recurringSchema = z.object({
+  accountId: objectId,
+  categoryId: objectId.optional(),
+  amount: z.number().positive("amount must be a positive number"),
+  type: z.enum(["income", "expense"]),
+  description: z.string().trim().optional(),
+  frequency: z.enum(["daily", "weekly", "monthly"]),
+  startDate: z.string().optional(),
+});
+
+export const recurringActiveSchema = z.object({
+  active: z.boolean(),
+});
+
+export const chatSchema = z.object({
+  message: z.string().trim().min(1, "message is required"),
+  history: z
+    .array(z.object({ role: z.enum(["user", "model"]), text: z.string() }))
+    .optional()
+    .default([]),
+});

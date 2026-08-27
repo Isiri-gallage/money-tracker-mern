@@ -4,6 +4,8 @@ import { requireAuth, AuthRequest } from "../middleware/auth.js";
 import { Budget } from "../models/Budget.js";
 import { Category } from "../models/Category.js";
 import { Transaction } from "../models/Transaction.js";
+import { validateBody } from "../middleware/validate.js";
+import { budgetSchema } from "../schemas.js";
 
 export const budgetsRouter = Router();
 
@@ -59,12 +61,8 @@ budgetsRouter.get("/", async (req: AuthRequest, res) => {
   res.json(result);
 });
 
-budgetsRouter.post("/", async (req: AuthRequest, res) => {
+budgetsRouter.post("/", validateBody(budgetSchema), async (req: AuthRequest, res) => {
   const { categoryId, month, limit } = req.body;
-
-  if (!categoryId || !month || !MONTH_RE.test(month) || typeof limit !== "number" || limit <= 0) {
-    return res.status(400).json({ error: "categoryId, a valid month (YYYY-MM), and a positive limit are required" });
-  }
 
   const category = await Category.findOne({ _id: categoryId, user: req.userId });
   if (!category) {

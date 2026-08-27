@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { requireAuth, AuthRequest } from "../middleware/auth.js";
 import { Category } from "../models/Category.js";
+import { validateBody } from "../middleware/validate.js";
+import { categorySchema } from "../schemas.js";
 
 export const categoriesRouter = Router();
 
@@ -11,12 +13,8 @@ categoriesRouter.get("/", async (req: AuthRequest, res) => {
   res.json(categories);
 });
 
-categoriesRouter.post("/", async (req: AuthRequest, res) => {
+categoriesRouter.post("/", validateBody(categorySchema), async (req: AuthRequest, res) => {
   const { name, type, color } = req.body;
-
-  if (!name || !type) {
-    return res.status(400).json({ error: "name and type are required" });
-  }
 
   const category = await Category.create({
     user: req.userId,

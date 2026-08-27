@@ -3,6 +3,8 @@ import type { FilterQuery } from "mongoose";
 import { requireAuth, AuthRequest } from "../middleware/auth.js";
 import { Transaction } from "../models/Transaction.js";
 import { Account } from "../models/Account.js";
+import { validateBody } from "../middleware/validate.js";
+import { transactionSchema } from "../schemas.js";
 
 export const transactionsRouter = Router();
 
@@ -75,12 +77,8 @@ transactionsRouter.get("/", async (req: AuthRequest, res) => {
   });
 });
 
-transactionsRouter.post("/", async (req: AuthRequest, res) => {
+transactionsRouter.post("/", validateBody(transactionSchema), async (req: AuthRequest, res) => {
   const { amount, type, description, date, categoryId, accountId } = req.body;
-
-  if (amount === undefined || !type || !accountId) {
-    return res.status(400).json({ error: "amount, type, and accountId are required" });
-  }
 
   const account = await Account.exists({ _id: accountId, user: req.userId });
   if (!account) {
