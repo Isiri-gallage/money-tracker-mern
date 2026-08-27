@@ -1,10 +1,10 @@
 import { Router } from "express";
 import type { FilterQuery } from "mongoose";
 import { requireAuth, AuthRequest } from "../middleware/auth.js";
-import { Transaction } from "../models/Transaction.js";
-import { Account } from "../models/Account.js";
 import { validateBody } from "../middleware/validate.js";
 import { transactionSchema } from "../schemas.js";
+import { Transaction } from "../models/Transaction.js";
+import { Account } from "../models/Account.js";
 
 export const transactionsRouter = Router();
 
@@ -17,13 +17,17 @@ function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function csvEscape(value: string): string {
+  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
 function parsePositiveInt(value: unknown, fallback: number, max?: number): number {
   const parsed = typeof value === "string" ? Number.parseInt(value, 10) : NaN;
   if (!Number.isFinite(parsed) || parsed < 1) return fallback;
   return max ? Math.min(parsed, max) : parsed;
 }
 
-transactionsRouter.get("/", async (req: AuthRequest, res) => {
+function buildFilter(req: AuthRequest): FilterQuery<typeof Transaction> {
   const { from, to, type, categoryId, accountId, q } = req.query;
 
   const filter: FilterQuery<typeof Transaction> = { user: req.userId };
@@ -57,6 +61,12 @@ transactionsRouter.get("/", async (req: AuthRequest, res) => {
     filter.description = { $regex: escapeRegex(q.trim()), $options: "i" };
   }
 
+  return filter;
+}
+
+transactionsRouter.get("/", async (req: AuthRequest, res) => {
+  const filter = buildFilter(req);
+
   const page = parsePositiveInt(req.query.page, 1);
   const limit = parsePositiveInt(req.query.limit, DEFAULT_LIMIT, MAX_LIMIT);
 
@@ -75,6 +85,32 @@ transactionsRouter.get("/", async (req: AuthRequest, res) => {
     limit,
     totalPages: Math.max(1, Math.ceil(total / limit)),
   });
+});
+
+transactionsRouter.get("/export", async (req: AuthRequest, res) => {
+  const filter = buildFilter(req);
+
+  const items = await Transaction.find(filter)
+    .sort({ date: -1, createdAt: -1 })
+    .populate("category")
+    .populate("account");
+
+  const header = "Date,Description,Account,Category,Type,Amount\n";
+  const rows = items.map((t) => {
+    const date = t.date.toISOString().slice(0, 10);
+    const description = csvEscape(t.description || "");
+    const account = csvEscape((t.account as unknown as { name?: string })?.name ?? "");
+    const category = csvEscape((t.category as unknown as { name?: string })?.name ?? "Uncategorized");
+    const amount = t.type === "expense" ? `-${t.amount.toFixed(2)}` : t.amount.toFixed(2);
+    return [date, description, account, category, t.type, amount].join(",");
+  });
+
+  const csv = header + rows.join("\n");
+  const filename = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.send(csv);
 });
 
 transactionsRouter.post("/", validateBody(transactionSchema), async (req: AuthRequest, res) => {

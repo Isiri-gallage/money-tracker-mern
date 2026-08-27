@@ -1,5 +1,35 @@
-import { api } from "./client";
+
 import type { TxType } from "./categories";
+import { api, BASE_URL, getToken } from "./client";
+
+export async function exportTransactionsCsv(filters: TransactionFilters = {}): Promise<void> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== null && value !== "") {
+      params.set(key, String(value));
+    }
+  }
+  const query = params.toString();
+  const token = getToken();
+
+  const res = await fetch(`${BASE_URL}/transactions/export${query ? `?${query}` : ""}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to export transactions");
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 export interface Transaction {
   _id: string;

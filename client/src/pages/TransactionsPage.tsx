@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ChevronLeft, ChevronRight, Plus, Receipt, Search, Trash2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Plus, Receipt, Search, Trash2, X } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 import { useReferenceData } from "../hooks/useReferenceData";
 import { formatSignedCurrency, formatDate } from "../lib/format";
@@ -10,6 +10,7 @@ import {
   getTransactions,
   createTransaction,
   deleteTransaction,
+  exportTransactionsCsv,
   type Transaction,
   type TransactionPage,
 } from "../api/transactions";
@@ -127,6 +128,21 @@ export default function TransactionsPage() {
     }
   }
 
+    async function handleExport() {
+    try {
+      await exportTransactionsCsv({
+        q: debouncedQ,
+        type: filters.type,
+        categoryId: filters.categoryId,
+        accountId: filters.accountId,
+        from: filters.from,
+        to: filters.to,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to export transactions");
+    }
+  }
+
   const categoryById = new Map(categories.map((c) => [c._id, c]));
   const accountById = new Map(accounts.map((a) => [a._id, a]));
   const inputClass =
@@ -138,14 +154,23 @@ export default function TransactionsPage() {
       <PageHeader
         title="Transactions"
         subtitle={result ? `${result.total} total` : undefined}
-        action={
-          <button
-            onClick={() => setShowForm((v) => !v)}
-            className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand to-info px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition hover:brightness-110"
-          >
-            <Plus size={15} strokeWidth={2.5} />
-            New transaction
-          </button>
+                action={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-1.5 rounded-xl border border-line bg-card-hi px-4 py-2 text-sm font-medium text-ink-dim transition hover:text-ink"
+            >
+              <Download size={15} strokeWidth={2.2} />
+              Export CSV
+            </button>
+            <button
+              onClick={() => setShowForm((v) => !v)}
+              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand to-info px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition hover:brightness-110"
+            >
+              <Plus size={15} strokeWidth={2.5} />
+              New transaction
+            </button>
+          </div>
         }
       />
 
