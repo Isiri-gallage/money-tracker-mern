@@ -83,3 +83,20 @@ export const goalUpdateSchema = z.object({
 export const goalContributionSchema = z.object({
   amount: z.number().refine((n) => n !== 0, "amount cannot be zero"),
 });
+
+export const csvPreviewSchema = z.object({
+  csvText: z.string().min(1, "csvText is required"),
+});
+
+const csvImportRowSchema = z.object({
+  date: z.string(),
+  description: z.string(),
+  amount: z.number().positive(),
+  type: z.enum(["income", "expense"]),
+});
+
+export const csvCommitSchema = z.object({
+  accountId: objectId,
+  categoryId: objectId.optional(),
+  transactions: z.array(csvImportRowSchema).min(1, "at least one transaction is required"),
+});

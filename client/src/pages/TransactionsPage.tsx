@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ChevronLeft, ChevronRight, Download, Plus, Receipt, Search, Trash2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Plus, Receipt, Search, Trash2, Upload, X } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 import { useReferenceData } from "../hooks/useReferenceData";
 import { formatSignedCurrency, formatDate } from "../lib/format";
@@ -14,6 +14,7 @@ import {
   type Transaction,
   type TransactionPage,
 } from "../api/transactions";
+import ImportCsvModal from "../components/ImportCsvModal";
 
 const EMPTY_FILTERS = {
   q: "",
@@ -36,6 +37,7 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+    const [showImport, setShowImport] = useState(false);
 
   const [txAmount, setTxAmount] = useState("");
   const [txType, setTxType] = useState<TxType>("expense");
@@ -154,8 +156,15 @@ export default function TransactionsPage() {
       <PageHeader
         title="Transactions"
         subtitle={result ? `${result.total} total` : undefined}
-                action={
+                        action={
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowImport(true)}
+              className="flex items-center gap-1.5 rounded-xl border border-line bg-card-hi px-4 py-2 text-sm font-medium text-ink-dim transition hover:text-ink"
+            >
+              <Upload size={15} strokeWidth={2.2} />
+              Import CSV
+            </button>
             <button
               onClick={handleExport}
               className="flex items-center gap-1.5 rounded-xl border border-line bg-card-hi px-4 py-2 text-sm font-medium text-ink-dim transition hover:text-ink"
@@ -456,6 +465,18 @@ export default function TransactionsPage() {
           </>
         )}
       </section>
+            {showImport && (
+        <ImportCsvModal
+          accounts={accounts}
+          categories={categories}
+          currency={currency}
+          onClose={() => setShowImport(false)}
+          onImported={async () => {
+            await load();
+            await reloadReference();
+          }}
+        />
+      )}
     </div>
   );
 }

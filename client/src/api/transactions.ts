@@ -96,3 +96,29 @@ export function deleteTransaction(id: string) {
 export function getSummary() {
   return api.get<Summary>("/transactions/summary");
 }
+
+export interface ImportRow {
+  rowIndex: number;
+  date: string;
+  description: string;
+  amount: number;
+  type: TxType;
+  duplicate: boolean;
+}
+
+export interface ImportPreview {
+  rows: ImportRow[];
+  skipped: { rowIndex: number; reason: string }[];
+}
+
+export function previewCsvImport(csvText: string) {
+  return api.post<ImportPreview>("/transactions/import/preview", { csvText });
+}
+
+export function commitCsvImport(data: {
+  accountId: string;
+  categoryId?: string;
+  transactions: Array<{ date: string; description: string; amount: number; type: TxType }>;
+}) {
+  return api.post<{ created: number }>("/transactions/import/commit", data);
+}

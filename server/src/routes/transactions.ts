@@ -2,7 +2,8 @@ import { Router } from "express";
 import type { FilterQuery } from "mongoose";
 import { requireAuth, AuthRequest } from "../middleware/auth.js";
 import { validateBody } from "../middleware/validate.js";
-import { transactionSchema } from "../schemas.js";
+import { transactionSchema, csvPreviewSchema, csvCommitSchema } from "../schemas.js";
+import { parseBankCsv } from "../services/csvImport.js";
 import { Transaction } from "../models/Transaction.js";
 import { Account } from "../models/Account.js";
 
@@ -111,6 +112,50 @@ transactionsRouter.get("/export", async (req: AuthRequest, res) => {
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
   res.send(csv);
+});
+
+transactionsRouter.post("/import/preview", validateBody(csvPreviewSchema), async (req: AuthRequest, res) => {
+  const { csvText } = req.body;
+  const { rows, skipped } = parseBankCsv(csvText);
+
+  const withDuplicateFlags = await Promise.all(
+    rows.map(async (row) => {
+      const dayStart = new Date(`${row.date}T00:00:00.000Z`);
+      const dayEnd = new Date(`${row.date}T23:59:59.999Z`);
+      const duplicate = await Transaction.exists({
+        user: req.userId,
+        amount: row.amount,
+        type: row.type,
+        date: { $gte: dayStart, $lte: dayEnd },
+        description: row.description,
+      });
+      return { ...row, duplicate: Boolean(duplicate) };
+    }),
+  );
+
+  res.json({ rows: withDuplicateFlags, skipped });
+});
+
+transactionsRouter.post("/import/commit", validateBody(csvCommitSchema), async (req: AuthRequest, res) => {
+  const { accountId, categoryId, transactions } = req.body;
+
+  const account = await Account.exists({ _id: accountId, user: req.userId });
+  if (!account) {
+    return res.status(400).json({ error: "Invalid accountId" });
+  }
+
+  const docs = transactions.map((t: { date: string; description: string; amount: number; type: "income" | "expense" }) => ({
+    user: req.userId,
+    account: accountId,
+    category: categoryId || undefined,
+    amount: t.amount,
+    type: t.type,
+    description: t.description,
+    date: new Date(t.date),
+  }));
+
+  const created = await Transaction.insertMany(docs);
+  res.status(201).json({ created: created.length });
 });
 
 transactionsRouter.post("/", validateBody(transactionSchema), async (req: AuthRequest, res) => {
