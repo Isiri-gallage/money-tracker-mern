@@ -1,0 +1,38 @@
+
+w14:paraId="4BDEBD3D" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">කරමු. මුලින්ම remote එක එකතු කරලා fetch කරන්නම් (මේ දෙක local, ආපහු හරවන්න පුළුවන්).
+w14:paraId="3B0EA99F" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">Added the SAS_project remote
+w14:paraId="3C8E1825" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">Remote එක එකතු වුණා. දැන් fetch.
+w14:paraId="3241260C" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">Fetched the SAS_project remote and compared history
+w14:paraId="085D75B3" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">History දෙක සම්බන්ධයි — common ancestor f93ecdc, ඔයාගෙ branch එකේ sas/main එකේ නැති commits 50ක්. පිරිසිදු push එකක් වෙයි.
+w14:paraId="0479179E" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">දැන් push කරනවා — මේක තමයි ඇත්තටම repo එකට යවන පියවර.
+w14:paraId="348BB5BB" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">Pushedisiri_db
+w14:paraId="6EC79CA6" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">Push සාර්ථකයි. ✅ තහවුරු කරගන්නම්.
+w14:paraId="4806102C" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">ඉවරයි. repo දෙකේම ඔයාගෙ වැඩේ තියෙනවා. ✅
+w14:paraId="2BA74DE3" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9"/>
+w14:paraId="4C63D881" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">Commit
+w14:paraId="13C5CD5F" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">Local isiri_db
+w14:paraId="2664635F" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">cde23dc
+w14:paraId="134FBEB9" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">origin/isiri_db (DGL_SAS_project)
+w14:paraId="7554717B" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">cde23dc ✅
+w14:paraId="64F82D2C" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">sas/isiri_db (SAS_project)
+w14:paraId="1FE9ED84" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">cde23dc ✅
+w14:paraId="62E916EB" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">තුනම එකයි. DGL එකට push නොකරපු commits 0.
+w14:paraId="2321179B" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">History දෙක සම්බන්ධ නිසා GitHub එකේ isiri_db branch එක හරියට පේනවා — main එකට එරෙහිව commits 50ක diff එකක් එක්ක. "no common history" කියන warning එක එන්නෙ නෑ.
+w14:paraId="47934DCE" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">මෙතන බලන්න: https://github.com/Nadeesha-Maduwantha/SAS_project/tree/isiri_db
+w14:paraId="1C1BD83D" w14:textId="77777777" w:rsidR="009D1360" w:rsidRDefault="009D1360" w:rsidP="008240C9"/>
+w14:paraId="5B417D4C" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">⚠️ එක දෙයක් වෙනස් වුණා — දැනගෙන ඉන්න
+w14:paraId="7A70C2EB" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">git push -u කියන එකේ -u නිසා upstream එක sas/isiri_db වෙලා. ඒ කියන්නෙ දැන් ඉඳන් හිස් git push එකක් කිව්වම SAS_project එකට යනවා, DGL එකට නෙවෙයි.
+w14:paraId="52F2AA4E" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">ඔයාගෙ ප්‍රධාන වැඩේ තියෙන්නෙ DGL එකේ නිසා, ඒක ආපහු හරවගන්න එක හොඳයි:
+w14:paraId="427C52C5" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">git branch -u origin/isiri_db isiri_db
+w14:paraId="368020A4" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">ඊට පස්සෙ:
+w14:paraId="6C70FB95" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">Command
+w14:paraId="45707253" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">කොහෙටද යන්නෙ
+w14:paraId="491C866E" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">git push
+w14:paraId="665E163B" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">origin (DGL_SAS_project)
+w14:paraId="6D10A2EE" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">git push sas isiri_db
+w14:paraId="3247887C" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">SAS_project
+w14:paraId="61D01084" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">
+w14:paraId="6A52E61A" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">දැන් ඉඳන් වැඩ කරන විදිහ
+w14:paraId="09526A6F" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">Commit කරාට පස්සෙ දෙකටම යවන්න:
+w14:paraId="39C9E8E2" w14:textId="77777777" w:rsidR="008240C9" w:rsidRPr="008240C9" w:rsidRDefault="008240C9" w:rsidP="008240C9">git push origin isiri_db
+w14:paraId="11F807A9" w14:textId="77777777" w:rsi

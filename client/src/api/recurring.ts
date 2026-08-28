@@ -39,3 +39,18 @@ export function setRecurringActive(id: string, active: boolean) {
 export function deleteRecurring(id: string) {
   return api.del<void>(`/recurring/${id}`);
 }
+
+export function updateRecurring(
+  id: string,
+  data: Partial<{
+    accountId: string;
+    categoryId: string;
+    amount: number;
+    type: TxType;
+    description: string;
+    frequency: RecurrenceFrequency;
+    startDate: string;
+  }>,
+) {
+  return api.patch<RecurringTransaction>(`/recurring/${id}`, data);
+}

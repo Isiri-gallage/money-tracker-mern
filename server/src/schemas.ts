@@ -63,8 +63,15 @@ export const recurringSchema = z.object({
   startDate: z.string().optional(),
 });
 
-export const recurringActiveSchema = z.object({
-  active: z.boolean(),
+export const recurringUpdateSchema = z.object({
+  accountId: objectId.optional(),
+  categoryId: objectId.optional(),
+  amount: z.number().positive("amount must be a positive number").optional(),
+  type: z.enum(["income", "expense"]).optional(),
+  description: z.string().trim().optional(),
+  frequency: z.enum(["daily", "weekly", "monthly"]).optional(),
+  startDate: z.string().optional(),
+  active: z.boolean().optional(),
 });
 
 export const chatSchema = z.object({
