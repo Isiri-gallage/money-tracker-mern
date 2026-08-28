@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ChevronLeft, ChevronRight, Download, Plus, Receipt, Search, Trash2, Upload, X } from "lucide-react";
-import { useAuth } from "../context/useAuth";
+import { ChevronLeft, ChevronRight, Download, Pencil, Plus, Receipt, Search, Trash2, Upload, X } from "lucide-react";import { useAuth } from "../context/useAuth";
 import { useReferenceData } from "../hooks/useReferenceData";
 import { formatSignedCurrency, formatDate } from "../lib/format";
 import { categoryIcon, categoryColor } from "../lib/categoryVisuals";
@@ -9,6 +8,7 @@ import type { TxType } from "../api/categories";
 import {
   getTransactions,
   createTransaction,
+  updateTransaction,
   deleteTransaction,
   exportTransactionsCsv,
   type Transaction,
@@ -38,6 +38,7 @@ export default function TransactionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
     const [showImport, setShowImport] = useState(false);
+      const [editingId, setEditingId] = useState<string | null>(null);
 
   const [txAmount, setTxAmount] = useState("");
   const [txType, setTxType] = useState<TxType>("expense");
@@ -92,29 +93,66 @@ export default function TransactionsPage() {
     filters.from !== "" ||
     filters.to !== "";
 
-  async function handleAdd(e: FormEvent) {
+    function resetFormFields() {
+    setTxAmount("");
+    setTxDescription("");
+    setTxCategoryId("");
+    setTxAccountId("");
+    setTxDate(new Date().toISOString().slice(0, 10));
+    setEditingId(null);
+  }
+
+  function closeForm() {
+    resetFormFields();
+    setShowForm(false);
+  }
+
+  function handleNewTransactionClick() {
+    if (showForm && !editingId) {
+      setShowForm(false);
+    } else {
+      resetFormFields();
+      setShowForm(true);
+    }
+  }
+
+  function handleEdit(t: Transaction) {
+    setEditingId(t._id);
+    setTxAmount(String(t.amount));
+    setTxType(t.type);
+    setTxDescription(t.description);
+    setTxCategoryId(t.category ?? "");
+    setTxAccountId(t.account);
+    setTxDate(t.date.slice(0, 10));
+    setShowForm(true);
+  }
+
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const amount = parseFloat(txAmount);
     if (!amount || amount <= 0 || !effectiveAccountId) return;
 
+    const payload = {
+      amount,
+      type: txType,
+      description: txDescription,
+      categoryId: txCategoryId || undefined,
+      accountId: effectiveAccountId,
+      date: new Date(`${txDate}T00:00:00.000Z`).toISOString(),
+    };
+
     try {
-      await createTransaction({
-        amount,
-        type: txType,
-        description: txDescription,
-        categoryId: txCategoryId || undefined,
-        accountId: effectiveAccountId,
-        date: new Date(`${txDate}T00:00:00.000Z`).toISOString(),
-      });
-      setTxAmount("");
-      setTxDescription("");
-      setTxCategoryId("");
-      setShowForm(false);
+      if (editingId) {
+        await updateTransaction(editingId, payload);
+      } else {
+        await createTransaction(payload);
+      }
+      closeForm();
       setPage(1);
       await load();
       await reloadReference();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add transaction");
+      setError(err instanceof Error ? err.message : `Failed to ${editingId ? "update" : "add"} transaction`);
     }
   }
 
@@ -172,8 +210,8 @@ export default function TransactionsPage() {
               <Download size={15} strokeWidth={2.2} />
               Export CSV
             </button>
-            <button
-              onClick={() => setShowForm((v) => !v)}
+                        <button
+              onClick={handleNewTransactionClick}
               className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand to-info px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition hover:brightness-110"
             >
               <Plus size={15} strokeWidth={2.5} />
@@ -189,8 +227,8 @@ export default function TransactionsPage() {
 
       {showForm && (
         <section className="mb-6 rounded-2xl border border-line bg-card p-6">
-          <h2 className="text-sm font-semibold text-ink">Add transaction</h2>
-          <form onSubmit={handleAdd} className="mt-4 flex flex-wrap items-end gap-3">
+                    <h2 className="text-sm font-semibold text-ink">{editingId ? "Edit transaction" : "Add transaction"}</h2>
+          <form onSubmit={handleSubmit} className="mt-4 flex flex-wrap items-end gap-3">
             <div className="w-36">
               <label className="mb-1 block text-xs font-medium text-ink-dim">Account</label>
               <select
@@ -258,13 +296,22 @@ export default function TransactionsPage() {
                   ))}
               </select>
             </div>
-            <button
+                        <button
               type="submit"
               disabled={accounts.length === 0}
               className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Add
+              {editingId ? "Save changes" : "Add"}
             </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={closeForm}
+                className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-ink-dim transition hover:bg-card-hi hover:text-ink"
+              >
+                Cancel
+              </button>
+            )}
           </form>
         </section>
       )}
@@ -421,7 +468,14 @@ export default function TransactionsPage() {
                         >
                           {formatSignedCurrency(t.amount, t.type, currency)}
                         </td>
-                        <td className="px-6 py-3.5 text-right">
+                                                <td className="px-6 py-3.5 text-right">
+                          <button
+                            onClick={() => handleEdit(t)}
+                            aria-label="Edit transaction"
+                            className="rounded-md p-1.5 text-ink-faint opacity-0 transition-colors hover:bg-card-hi hover:text-ink group-hover:opacity-100"
+                          >
+                            <Pencil size={14} strokeWidth={2} />
+                          </button>
                           <button
                             onClick={() => handleDelete(t)}
                             aria-label="Delete transaction"

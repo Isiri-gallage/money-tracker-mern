@@ -38,6 +38,15 @@ export const transactionSchema = z.object({
   accountId: objectId,
 });
 
+export const transactionUpdateSchema = z.object({
+  amount: z.number().positive("amount must be a positive number").optional(),
+  type: z.enum(["income", "expense"]).optional(),
+  description: z.string().trim().optional(),
+  date: z.string().optional(),
+  categoryId: objectId.optional(),
+  accountId: objectId.optional(),
+});
+
 export const budgetSchema = z.object({
   categoryId: objectId,
   month: z.string().regex(/^\d{4}-\d{2}$/, "month must be in YYYY-MM format"),

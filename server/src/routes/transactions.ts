@@ -2,8 +2,7 @@ import { Router } from "express";
 import type { FilterQuery } from "mongoose";
 import { requireAuth, AuthRequest } from "../middleware/auth.js";
 import { validateBody } from "../middleware/validate.js";
-import { transactionSchema, csvPreviewSchema, csvCommitSchema } from "../schemas.js";
-import { parseBankCsv } from "../services/csvImport.js";
+import { transactionSchema, transactionUpdateSchema, csvPreviewSchema, csvCommitSchema } from "../schemas.js";import { parseBankCsv } from "../services/csvImport.js";
 import { Transaction } from "../models/Transaction.js";
 import { Account } from "../models/Account.js";
 
@@ -187,6 +186,32 @@ transactionsRouter.delete("/:id", async (req: AuthRequest, res) => {
   }
 
   res.status(204).send();
+});
+
+transactionsRouter.patch("/:id", validateBody(transactionUpdateSchema), async (req: AuthRequest, res) => {
+  const { amount, type, description, date, categoryId, accountId } = req.body;
+
+  if (accountId) {
+    const account = await Account.exists({ _id: accountId, user: req.userId });
+    if (!account) {
+      return res.status(400).json({ error: "Invalid accountId" });
+    }
+  }
+
+  const update: Record<string, unknown> = {};
+  if (amount !== undefined) update.amount = amount;
+  if (type !== undefined) update.type = type;
+  if (description !== undefined) update.description = description;
+  if (date !== undefined) update.date = new Date(date);
+  if (categoryId !== undefined) update.category = categoryId;
+  if (accountId !== undefined) update.account = accountId;
+
+  const transaction = await Transaction.findOneAndUpdate({ _id: req.params.id, user: req.userId }, update, { new: true });
+  if (!transaction) {
+    return res.status(404).json({ error: "Transaction not found" });
+  }
+
+  res.json(transaction);
 });
 
 transactionsRouter.get("/summary", async (req: AuthRequest, res) => {

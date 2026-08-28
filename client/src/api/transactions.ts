@@ -122,3 +122,17 @@ export function commitCsvImport(data: {
 }) {
   return api.post<{ created: number }>("/transactions/import/commit", data);
 }
+
+export function updateTransaction(
+  id: string,
+  data: Partial<{
+    amount: number;
+    type: TxType;
+    description: string;
+    date: string;
+    categoryId: string;
+    accountId: string;
+  }>,
+) {
+  return api.patch<Transaction>(`/transactions/${id}`, data);
+}
