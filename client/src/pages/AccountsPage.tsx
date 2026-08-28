@@ -5,6 +5,7 @@ import { useReferenceData } from "../hooks/useReferenceData";
 import { formatCurrency } from "../lib/format";
 import PageHeader from "../components/PageHeader";
 import { createAccount, deleteAccount, type Account, type AccountType } from "../api/accounts";
+import Select from "../components/Select";
 
 const ACCOUNT_ICONS: Record<AccountType, typeof Wallet> = {
   cash: Wallet,
@@ -94,14 +95,18 @@ export default function AccountsPage() {
               className={inputClass}
             />
           </div>
-          <div className="w-36">
+                    <div className="w-36">
             <label className="mb-1 block text-xs font-medium text-ink-dim">Type</label>
-            <select value={type} onChange={(e) => setType(e.target.value as AccountType)} className={inputClass}>
-              <option value="cash">Cash</option>
-              <option value="bank">Bank</option>
-              <option value="card">Card</option>
-              <option value="other">Other</option>
-            </select>
+            <Select
+              value={type}
+              onChange={(v) => setType(v as AccountType)}
+              options={[
+                { value: "cash", label: "Cash" },
+                { value: "bank", label: "Bank" },
+                { value: "card", label: "Card" },
+                { value: "other", label: "Other" },
+              ]}
+            />
           </div>
           <button
             type="submit"

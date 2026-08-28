@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Plus, Tag, Trash2 } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 import { useReferenceData } from "../hooks/useReferenceData";
@@ -6,6 +6,7 @@ import { CURRENCIES, type CurrencyCode } from "../lib/currencies";
 import { categoryIcon, categoryColor } from "../lib/categoryVisuals";
 import PageHeader from "../components/PageHeader";
 import { createCategory, deleteCategory, type Category, type TxType } from "../api/categories";
+import Select from "../components/Select";
 
 export default function SettingsPage() {
   const { user, updateCurrency, logout } = useAuth();
@@ -16,10 +17,10 @@ export default function SettingsPage() {
   const [type, setType] = useState<TxType>("expense");
   const [error, setError] = useState<string | null>(null);
 
-  async function handleCurrencyChange(e: ChangeEvent<HTMLSelectElement>) {
+    async function handleCurrencyChange(value: string) {
     setError(null);
     try {
-      await updateCurrency(e.target.value as CurrencyCode);
+      await updateCurrency(value as CurrencyCode);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update currency");
     }
@@ -65,13 +66,13 @@ export default function SettingsPage() {
         <p className="mt-1 text-xs text-ink-dim">
           Changes how every amount is displayed. Existing amounts are not converted.
         </p>
-        <select value={currency} onChange={handleCurrencyChange} className={`${inputClass} mt-4 max-w-xs`}>
-          {CURRENCIES.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.code} — {c.label}
-            </option>
-          ))}
-        </select>
+                <div className="mt-4 max-w-xs">
+          <Select
+            value={currency}
+            onChange={handleCurrencyChange}
+            options={CURRENCIES.map((c) => ({ value: c.code, label: `${c.code} — ${c.label}` }))}
+          />
+        </div>
       </section>
 
       <section className="mb-6 rounded-2xl border border-line bg-card p-6">
@@ -88,12 +89,16 @@ export default function SettingsPage() {
               className={inputClass}
             />
           </div>
-          <div className="w-36">
+                    <div className="w-36">
             <label className="mb-1 block text-xs font-medium text-ink-dim">Type</label>
-            <select value={type} onChange={(e) => setType(e.target.value as TxType)} className={inputClass}>
-              <option value="expense">Expense</option>
-              <option value="income">Income</option>
-            </select>
+            <Select
+              value={type}
+              onChange={(v) => setType(v as TxType)}
+              options={[
+                { value: "expense", label: "Expense" },
+                { value: "income", label: "Income" },
+              ]}
+            />
           </div>
           <button
             type="submit"

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ChevronLeft, ChevronRight, Download, Pencil, Plus, Receipt, Search, Trash2, Upload, X } from "lucide-react";import { useAuth } from "../context/useAuth";
+import { ChevronLeft, ChevronRight, Download, Pencil, Plus, Receipt, Search, Trash2, Upload, X } from "lucide-react";
+import { useAuth } from "../context/useAuth";
 import { useReferenceData } from "../hooks/useReferenceData";
 import { formatSignedCurrency, formatDate } from "../lib/format";
 import { categoryIcon, categoryColor } from "../lib/categoryVisuals";
 import PageHeader from "../components/PageHeader";
+import Select from "../components/Select";
 import type { TxType } from "../api/categories";
 import {
   getTransactions,
@@ -18,9 +20,9 @@ import ImportCsvModal from "../components/ImportCsvModal";
 
 const EMPTY_FILTERS = {
   q: "",
-  type: "" as TxType | "",
-  categoryId: "",
-  accountId: "",
+  type: "all" as TxType | "all",
+  categoryId: "all",
+  accountId: "all",
   from: "",
   to: "",
 };
@@ -37,13 +39,13 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-    const [showImport, setShowImport] = useState(false);
-      const [editingId, setEditingId] = useState<string | null>(null);
+  const [showImport, setShowImport] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [txAmount, setTxAmount] = useState("");
   const [txType, setTxType] = useState<TxType>("expense");
   const [txDescription, setTxDescription] = useState("");
-  const [txCategoryId, setTxCategoryId] = useState("");
+  const [txCategoryId, setTxCategoryId] = useState("none");
   const [txAccountId, setTxAccountId] = useState("");
   const [txDate, setTxDate] = useState(() => new Date().toISOString().slice(0, 10));
 
@@ -61,9 +63,9 @@ export default function TransactionsPage() {
         page,
         limit: 20,
         q: debouncedQ,
-        type: filters.type,
-        categoryId: filters.categoryId,
-        accountId: filters.accountId,
+        type: filters.type === "all" ? "" : filters.type,
+        categoryId: filters.categoryId === "all" ? "" : filters.categoryId,
+        accountId: filters.accountId === "all" ? "" : filters.accountId,
         from: filters.from,
         to: filters.to,
       });
@@ -87,16 +89,16 @@ export default function TransactionsPage() {
 
   const hasFilters =
     filters.q !== "" ||
-    filters.type !== "" ||
-    filters.categoryId !== "" ||
-    filters.accountId !== "" ||
+    filters.type !== "all" ||
+    filters.categoryId !== "all" ||
+    filters.accountId !== "all" ||
     filters.from !== "" ||
     filters.to !== "";
 
-    function resetFormFields() {
+  function resetFormFields() {
     setTxAmount("");
     setTxDescription("");
-    setTxCategoryId("");
+    setTxCategoryId("none");
     setTxAccountId("");
     setTxDate(new Date().toISOString().slice(0, 10));
     setEditingId(null);
@@ -121,7 +123,7 @@ export default function TransactionsPage() {
     setTxAmount(String(t.amount));
     setTxType(t.type);
     setTxDescription(t.description);
-    setTxCategoryId(t.category ?? "");
+    setTxCategoryId(t.category ?? "none");
     setTxAccountId(t.account);
     setTxDate(t.date.slice(0, 10));
     setShowForm(true);
@@ -136,7 +138,7 @@ export default function TransactionsPage() {
       amount,
       type: txType,
       description: txDescription,
-      categoryId: txCategoryId || undefined,
+      categoryId: txCategoryId === "none" ? undefined : txCategoryId,
       accountId: effectiveAccountId,
       date: new Date(`${txDate}T00:00:00.000Z`).toISOString(),
     };
@@ -168,13 +170,13 @@ export default function TransactionsPage() {
     }
   }
 
-    async function handleExport() {
+  async function handleExport() {
     try {
       await exportTransactionsCsv({
         q: debouncedQ,
-        type: filters.type,
-        categoryId: filters.categoryId,
-        accountId: filters.accountId,
+        type: filters.type === "all" ? "" : filters.type,
+        categoryId: filters.categoryId === "all" ? "" : filters.categoryId,
+        accountId: filters.accountId === "all" ? "" : filters.accountId,
         from: filters.from,
         to: filters.to,
       });
@@ -194,7 +196,7 @@ export default function TransactionsPage() {
       <PageHeader
         title="Transactions"
         subtitle={result ? `${result.total} total` : undefined}
-                        action={
+        action={
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowImport(true)}
@@ -210,7 +212,7 @@ export default function TransactionsPage() {
               <Download size={15} strokeWidth={2.2} />
               Export CSV
             </button>
-                        <button
+            <button
               onClick={handleNewTransactionClick}
               className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand to-info px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/25 transition hover:brightness-110"
             >
@@ -227,22 +229,15 @@ export default function TransactionsPage() {
 
       {showForm && (
         <section className="mb-6 rounded-2xl border border-line bg-card p-6">
-                    <h2 className="text-sm font-semibold text-ink">{editingId ? "Edit transaction" : "Add transaction"}</h2>
+          <h2 className="text-sm font-semibold text-ink">{editingId ? "Edit transaction" : "Add transaction"}</h2>
           <form onSubmit={handleSubmit} className="mt-4 flex flex-wrap items-end gap-3">
             <div className="w-36">
               <label className="mb-1 block text-xs font-medium text-ink-dim">Account</label>
-              <select
+              <Select
                 value={effectiveAccountId}
-                onChange={(e) => setTxAccountId(e.target.value)}
-                required
-                className={fieldClass}
-              >
-                {accounts.map((a) => (
-                  <option key={a._id} value={a._id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setTxAccountId}
+                options={accounts.map((a) => ({ value: a._id, label: a.name }))}
+              />
             </div>
             <div className="w-28">
               <label className="mb-1 block text-xs font-medium text-ink-dim">Amount</label>
@@ -258,17 +253,17 @@ export default function TransactionsPage() {
             </div>
             <div className="w-32">
               <label className="mb-1 block text-xs font-medium text-ink-dim">Type</label>
-              <select
+              <Select
                 value={txType}
-                onChange={(e) => {
-                  setTxType(e.target.value as TxType);
-                  setTxCategoryId("");
+                onChange={(v) => {
+                  setTxType(v as TxType);
+                  setTxCategoryId("none");
                 }}
-                className={fieldClass}
-              >
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-              </select>
+                options={[
+                  { value: "expense", label: "Expense" },
+                  { value: "income", label: "Income" },
+                ]}
+              />
             </div>
             <div className="w-40">
               <label className="mb-1 block text-xs font-medium text-ink-dim">Date</label>
@@ -285,18 +280,16 @@ export default function TransactionsPage() {
             </div>
             <div className="w-40">
               <label className="mb-1 block text-xs font-medium text-ink-dim">Category</label>
-              <select value={txCategoryId} onChange={(e) => setTxCategoryId(e.target.value)} className={fieldClass}>
-                <option value="">None</option>
-                {categories
-                  .filter((c) => c.type === txType)
-                  .map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.name}
-                    </option>
-                  ))}
-              </select>
+              <Select
+                value={txCategoryId}
+                onChange={setTxCategoryId}
+                options={[
+                  { value: "none", label: "None" },
+                  ...categories.filter((c) => c.type === txType).map((c) => ({ value: c._id, label: c.name })),
+                ]}
+              />
             </div>
-                        <button
+            <button
               type="submit"
               disabled={accounts.length === 0}
               className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
@@ -333,47 +326,39 @@ export default function TransactionsPage() {
 
           <div className="w-32">
             <label className="mb-1 block text-xs font-medium text-ink-dim">Type</label>
-            <select
+            <Select
               value={filters.type}
-              onChange={(e) => updateFilter("type", e.target.value as TxType | "")}
-              className={`${inputClass} w-full`}
-            >
-              <option value="">All types</option>
-              <option value="expense">Expense</option>
-              <option value="income">Income</option>
-            </select>
+              onChange={(v) => updateFilter("type", v as TxType | "all")}
+              options={[
+                { value: "all", label: "All types" },
+                { value: "expense", label: "Expense" },
+                { value: "income", label: "Income" },
+              ]}
+            />
           </div>
 
           <div className="w-36">
             <label className="mb-1 block text-xs font-medium text-ink-dim">Account</label>
-            <select
+            <Select
               value={filters.accountId}
-              onChange={(e) => updateFilter("accountId", e.target.value)}
-              className={`${inputClass} w-full`}
-            >
-              <option value="">All accounts</option>
-              {accounts.map((a) => (
-                <option key={a._id} value={a._id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => updateFilter("accountId", v)}
+              options={[
+                { value: "all", label: "All accounts" },
+                ...accounts.map((a) => ({ value: a._id, label: a.name })),
+              ]}
+            />
           </div>
 
           <div className="w-40">
             <label className="mb-1 block text-xs font-medium text-ink-dim">Category</label>
-            <select
+            <Select
               value={filters.categoryId}
-              onChange={(e) => updateFilter("categoryId", e.target.value)}
-              className={`${inputClass} w-full`}
-            >
-              <option value="">All categories</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => updateFilter("categoryId", v)}
+              options={[
+                { value: "all", label: "All categories" },
+                ...categories.map((c) => ({ value: c._id, label: c.name })),
+              ]}
+            />
           </div>
 
           <div className="w-40">
@@ -432,7 +417,7 @@ export default function TransactionsPage() {
                     <th className="px-6 py-3 font-medium">Account</th>
                     <th className="px-6 py-3 font-medium">Category</th>
                     <th className="px-6 py-3 text-right font-medium">Amount</th>
-                    <th className="w-10 px-6 py-3" />
+                    <th className="w-16 px-6 py-3" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -468,7 +453,7 @@ export default function TransactionsPage() {
                         >
                           {formatSignedCurrency(t.amount, t.type, currency)}
                         </td>
-                                                <td className="px-6 py-3.5 text-right">
+                        <td className="px-6 py-3.5 text-right">
                           <button
                             onClick={() => handleEdit(t)}
                             aria-label="Edit transaction"
@@ -519,7 +504,7 @@ export default function TransactionsPage() {
           </>
         )}
       </section>
-            {showImport && (
+      {showImport && (
         <ImportCsvModal
           accounts={accounts}
           categories={categories}

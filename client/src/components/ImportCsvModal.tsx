@@ -5,6 +5,7 @@ import type { Account } from "../api/accounts";
 import type { Category } from "../api/categories";
 import { previewCsvImport, commitCsvImport, type ImportRow, type ImportPreview } from "../api/transactions";
 import type { CurrencyCode } from "../lib/currencies";
+import Select from "./Select";
 
 interface Props {
   accounts: Account[];
@@ -18,8 +19,7 @@ export default function ImportCsvModal({ accounts, categories, currency, onClose
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [accountId, setAccountId] = useState(accounts[0]?._id ?? "");
-  const [categoryId, setCategoryId] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [categoryId, setCategoryId] = useState("none");  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleFile(e: ChangeEvent<HTMLInputElement>) {
@@ -58,8 +58,7 @@ export default function ImportCsvModal({ accounts, categories, currency, onClose
         .filter((r) => selected.has(r.rowIndex))
         .map((r) => ({ date: r.date, description: r.description, amount: r.amount, type: r.type }));
 
-      await commitCsvImport({ accountId, categoryId: categoryId || undefined, transactions });
-      onImported();
+      await commitCsvImport({ accountId, categoryId: categoryId === "none" ? undefined : categoryId, transactions });      onImported();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to import transactions");
@@ -108,16 +107,24 @@ export default function ImportCsvModal({ accounts, categories, currency, onClose
                     ))}
                   </select>
                 </div>
+                                <div className="min-w-[160px] flex-1">
+                  <label className="mb-1 block text-xs font-medium text-ink-dim">Account</label>
+                  <Select
+                    value={accountId}
+                    onChange={setAccountId}
+                    options={accounts.map((a) => ({ value: a._id, label: a.name }))}
+                  />
+                </div>
                 <div className="min-w-[160px] flex-1">
                   <label className="mb-1 block text-xs font-medium text-ink-dim">Category (optional, applies to all)</label>
-                  <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={`${inputClass} w-full`}>
-                    <option value="">None</option>
-                    {categories.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    value={categoryId}
+                    onChange={setCategoryId}
+                    options={[
+                      { value: "none", label: "None" },
+                      ...categories.map((c) => ({ value: c._id, label: c.name })),
+                    ]}
+                  />
                 </div>
               </div>
 

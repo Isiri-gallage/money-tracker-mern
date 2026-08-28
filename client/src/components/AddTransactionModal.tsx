@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { createTransaction } from "../api/transactions";
 import type { Account } from "../api/accounts";
 import type { Category, TxType } from "../api/categories";
+import Select from "./Select";
 
 interface Props {
   open: boolean;
@@ -16,8 +17,7 @@ export default function AddTransactionModal({ open, accounts, categories, onClos
   const [amount, setAmount] = useState("");
   const [type, setType] = useState<TxType>("expense");
   const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [accountId, setAccountId] = useState("");
+  const [categoryId, setCategoryId] = useState("none");  const [accountId, setAccountId] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export default function AddTransactionModal({ open, accounts, categories, onClos
         amount: value,
         type,
         description,
-        categoryId: categoryId || undefined,
+                categoryId: categoryId === "none" ? undefined : categoryId,
         accountId: effectiveAccountId,
         date: new Date(`${date}T00:00:00.000Z`).toISOString(),
       });
@@ -104,37 +104,30 @@ export default function AddTransactionModal({ open, accounts, categories, onClos
                 className={`${field} tabular-nums`}
               />
             </div>
-            <div>
+                        <div>
               <label className="mb-1 block text-xs font-medium text-ink-dim">Type</label>
-              <select
+              <Select
                 value={type}
-                onChange={(e) => {
-                  setType(e.target.value as TxType);
-                  setCategoryId("");
+                onChange={(v) => {
+                  setType(v as TxType);
+                  setCategoryId("none");
                 }}
-                className={field}
-              >
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-              </select>
+                options={[
+                  { value: "expense", label: "Expense" },
+                  { value: "income", label: "Income" },
+                ]}
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
+                        <div>
               <label className="mb-1 block text-xs font-medium text-ink-dim">Account</label>
-              <select
+              <Select
                 value={effectiveAccountId}
-                onChange={(e) => setAccountId(e.target.value)}
-                required
-                className={field}
-              >
-                {accounts.map((a) => (
-                  <option key={a._id} value={a._id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setAccountId}
+                options={accounts.map((a) => ({ value: a._id, label: a.name }))}
+              />
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-ink-dim">Date</label>
@@ -152,18 +145,16 @@ export default function AddTransactionModal({ open, accounts, categories, onClos
             />
           </div>
 
-          <div>
+                    <div>
             <label className="mb-1 block text-xs font-medium text-ink-dim">Category</label>
-            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={field}>
-              <option value="">None</option>
-              {categories
-                .filter((c) => c.type === type)
-                .map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name}
-                  </option>
-                ))}
-            </select>
+            <Select
+              value={categoryId}
+              onChange={setCategoryId}
+              options={[
+                { value: "none", label: "None" },
+                ...categories.filter((c) => c.type === type).map((c) => ({ value: c._id, label: c.name })),
+              ]}
+            />
           </div>
 
           {error && <p className="rounded-lg border border-neg/30 bg-neg/10 px-3 py-2 text-xs text-neg">{error}</p>}

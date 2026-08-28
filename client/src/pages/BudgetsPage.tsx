@@ -6,6 +6,7 @@ import { formatCurrency } from "../lib/format";
 import { categoryIcon } from "../lib/categoryVisuals";
 import PageHeader from "../components/PageHeader";
 import { getBudgets, upsertBudget, deleteBudget, type Budget } from "../api/budgets";
+import Select from "../components/Select";
 
 function shiftMonth(month: string, delta: number): string {
   const [year, monthNum] = month.split("-").map(Number);
@@ -142,23 +143,14 @@ export default function BudgetsPage() {
       <section className="mb-6 rounded-2xl border border-line bg-card p-6">
         <h2 className="text-sm font-semibold text-ink">Set a budget</h2>
         <form onSubmit={handleAdd} className="mt-4 flex flex-wrap items-end gap-3">
-          <div className="min-w-[180px] flex-1">
+                    <div className="min-w-[180px] flex-1">
             <label className="mb-1 block text-xs font-medium text-ink-dim">Category</label>
-            <select
+            <Select
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              required
-              className={inputClass}
-            >
-              <option value="">Select category…</option>
-              {categories
-                .filter((c) => c.type === "expense")
-                .map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name}
-                  </option>
-                ))}
-            </select>
+              onChange={setCategoryId}
+              placeholder="Select category…"
+              options={categories.filter((c) => c.type === "expense").map((c) => ({ value: c._id, label: c.name }))}
+            />
           </div>
           <div className="w-40">
             <label className="mb-1 block text-xs font-medium text-ink-dim">Monthly limit</label>

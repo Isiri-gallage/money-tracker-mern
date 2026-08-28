@@ -4,6 +4,7 @@ import { formatCurrency, formatDate } from "../lib/format";
 import type { CurrencyCode } from "../lib/currencies";
 import type { Account } from "../api/accounts";
 import type { Category, TxType } from "../api/categories";
+import Select from "./Select";
 import {
   getRecurring,
   createRecurring,
@@ -35,7 +36,7 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
   const [type, setType] = useState<TxType>("expense");
   const [description, setDescription] = useState("");
   const [frequency, setFrequency] = useState<RecurrenceFrequency>("monthly");
-  const [categoryId, setCategoryId] = useState("");
+  const [categoryId, setCategoryId] = useState("none");
   const [startDate, setStartDate] = useState(today());
   const effectiveAccountId = accountId || accounts[0]?._id || "";
 
@@ -59,7 +60,7 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
     setType("expense");
     setDescription("");
     setFrequency("monthly");
-    setCategoryId("");
+    setCategoryId("none");
     setStartDate(today());
     setEditingId(null);
   }
@@ -71,7 +72,7 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
     setType(item.type);
     setDescription(item.description);
     setFrequency(item.frequency);
-    setCategoryId(item.category ?? "");
+    setCategoryId(item.category ?? "none");
     setStartDate(item.nextRunDate.slice(0, 10));
   }
 
@@ -83,7 +84,7 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
     setError(null);
     const payload = {
       accountId: effectiveAccountId,
-      categoryId: categoryId || undefined,
+      categoryId: categoryId === "none" ? undefined : categoryId,
       amount: value,
       type,
       description,
@@ -142,18 +143,11 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
       <form onSubmit={handleSubmit} className="mt-4 flex flex-wrap items-end gap-3">
         <div className="w-36">
           <label className="mb-1 block text-xs font-medium text-ink-dim">Account</label>
-          <select
-             value={effectiveAccountId}
-            onChange={(e) => setAccountId(e.target.value)}
-            required
-            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
-          >
-            {accounts.map((a) => (
-              <option key={a._id} value={a._id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={effectiveAccountId}
+            onChange={setAccountId}
+            options={accounts.map((a) => ({ value: a._id, label: a.name }))}
+          />
         </div>
         <div className="w-24">
           <label className="mb-1 block text-xs font-medium text-ink-dim">Amount</label>
@@ -169,29 +163,29 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
         </div>
         <div className="w-28">
           <label className="mb-1 block text-xs font-medium text-ink-dim">Type</label>
-          <select
+          <Select
             value={type}
-            onChange={(e) => {
-              setType(e.target.value as TxType);
-              setCategoryId("");
+            onChange={(v) => {
+              setType(v as TxType);
+              setCategoryId("none");
             }}
-            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
-          >
-            <option value="expense">Expense</option>
-            <option value="income">Income</option>
-          </select>
+            options={[
+              { value: "expense", label: "Expense" },
+              { value: "income", label: "Income" },
+            ]}
+          />
         </div>
         <div className="w-28">
           <label className="mb-1 block text-xs font-medium text-ink-dim">Every</label>
-          <select
+          <Select
             value={frequency}
-            onChange={(e) => setFrequency(e.target.value as RecurrenceFrequency)}
-            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
-          >
-            <option value="daily">Day</option>
-            <option value="weekly">Week</option>
-            <option value="monthly">Month</option>
-          </select>
+            onChange={(v) => setFrequency(v as RecurrenceFrequency)}
+            options={[
+              { value: "daily", label: "Day" },
+              { value: "weekly", label: "Week" },
+              { value: "monthly", label: "Month" },
+            ]}
+          />
         </div>
         <div className="w-40">
           <label className="mb-1 block text-xs font-medium text-ink-dim">Start date</label>
@@ -213,20 +207,14 @@ export default function RecurringPanel({ accounts, categories, currency, onChang
         </div>
         <div className="w-36">
           <label className="mb-1 block text-xs font-medium text-ink-dim">Category</label>
-          <select
+          <Select
             value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full rounded-lg border border-line px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30"
-          >
-            <option value="">None</option>
-            {categories
-              .filter((c) => c.type === type)
-              .map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-          </select>
+            onChange={setCategoryId}
+            options={[
+              { value: "none", label: "None" },
+              ...categories.filter((c) => c.type === type).map((c) => ({ value: c._id, label: c.name })),
+            ]}
+          />
         </div>
         <button
           type="submit"
